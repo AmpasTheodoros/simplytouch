@@ -1,0 +1,170 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id         String     @id @default(cuid())
+  clerkId    String     @unique
+  email      String     @unique
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  properties Property[]
+}
+
+model Property {
+  id              String           @id @default(cuid())
+  userId          String
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  timezone        String           @default("Europe/Athens")
+  pricePerWh      Int              @default(15) // cents per 100 Wh (0.15€/kWh = 15 cents/100Wh)
+  icalUrl         String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  bookings        Booking[]
+  meterReadings   MeterReading[]
+  expenses        Expense[]
+  cleaningEvents  CleaningEvent[]
+  costAllocations CostAllocation[]
+  guestPages      GuestPage[]
+  scanEvents      ScanEvent[]
+
+  @@index([userId])
+}
+
+model Booking {
+  id               String          @id @default(cuid())
+  propertyId       String
+  property         Property        @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  externalId       String?         // iCal UID
+  source           String          @default("manual") // airbnb, booking, vrbo, direct, manual
+  guestName        String?
+  startAt          DateTime
+  endAt            DateTime
+  nights           Int
+  payoutCents      Int             @default(0)
+  platformFeeCents Int             @default(0)
+  status           BookingStatus   @default(UPCOMING)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  costAllocation   CostAllocation?
+  cleaningEvent    CleaningEvent?
+
+  @@unique([propertyId, externalId])
+  @@index([propertyId, startAt])
+  @@index([propertyId, status])
+}
+
+enum BookingStatus {
+  UPCOMING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+model MeterReading {
+  id         String   @id @default(cuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  recordedAt DateTime
+  valueWh    Int      // cumulative Wh
+  createdAt  DateTime @default(now())
+
+  @@index([propertyId, recordedAt])
+}
+
+model Expense {
+  id          String           @id @default(cuid())
+  propertyId  String
+  property    Property         @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  name        String
+  amountCents Int
+  frequency   ExpenseFrequency @default(MONTHLY)
+  category    String           @default("utilities")
+  active      Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([propertyId])
+}
+
+enum ExpenseFrequency {
+  MONTHLY
+  YEARLY
+}
+
+model CleaningEvent {
+  id          String         @id @default(cuid())
+  propertyId  String
+  property    Property       @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  bookingId   String?        @unique // linked to checkout booking
+  booking     Booking?       @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  scheduledAt DateTime
+  costCents   Int
+  cleanerName String?
+  status      CleaningStatus @default(SCHEDULED)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([propertyId, scheduledAt])
+}
+
+enum CleaningStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+model CostAllocation {
+  id                   String   @id @default(cuid())
+  propertyId           String
+  property             Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  bookingId            String   @unique
+  booking              Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  electricityWh        Int      @default(0)
+  electricityCostCents Int      @default(0)
+  cleaningCostCents    Int      @default(0)
+  fixedCostCents       Int      @default(0)
+  totalCostCents       Int      @default(0)
+  profitCents          Int      @default(0)
+  marginPercent        Float    @default(0)
+  allocatedAt          DateTime @default(now())
+
+  @@index([propertyId])
+}
+
+model GuestPage {
+  id         String   @id @default(cuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  slug       String   @unique
+  title      String
+  blocks     Json     // Array of block objects
+  published  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([propertyId])
+}
+
+model ScanEvent {
+  id         String   @id @default(cuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  slug       String
+  scannedAt  DateTime @default(now())
+  userAgent  String?
+  ipHash     String?  // hashed for privacy
+  utmSource  String?
+  utmMedium  String?
+
+  @@index([propertyId, scannedAt])
+  @@index([slug, scannedAt])
+}

@@ -1,0 +1,392 @@
+@import 'tailwindcss';
+
+/* ProfitBnB Design System - Financial SaaS for Airbnb Hosts */
+/* Deep Blue #294e74 | Bright Red #e44c3f | White backgrounds */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@500;600;700&display=swap')
+layer(utilities);
+
+@plugin 'tailwindcss-animate';
+
+@custom-variant dark (&:is(.dark *));
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 2rem;
+  @media (width >= --theme(--breakpoint-sm)) {
+    max-width: none;
+  }
+  @media (width >= 1400px) {
+    max-width: 1400px;
+  }
+}
+
+@theme {
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-profit: hsl(var(--profit));
+  --color-profit-foreground: hsl(var(--profit-foreground));
+
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+
+  --color-sidebar: hsl(var(--sidebar-background));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  --font-sans: Inter, system-ui, sans-serif;
+  --font-display: DM Sans, Inter, system-ui, sans-serif;
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --shadow-card: var(--shadow-card);
+  --shadow-card-hover: var(--shadow-card-hover);
+  --shadow-elevated: var(--shadow-lg);
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-fade-in: fade-in 0.5s ease-out forwards;
+  --animate-slide-up: slide-up 0.6s ease-out forwards;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+@utility text-gradient {
+  @apply bg-clip-text text-transparent;
+  background-image: var(--gradient-hero);
+}
+
+@utility hero-gradient {
+  background: var(--gradient-hero);
+}
+
+@utility card-elevated {
+  box-shadow: var(--shadow-card);
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
+
+  &:hover {
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-2px);
+  }
+}
+
+@utility stat-card {
+  @apply rounded-xl border border-border bg-card p-6;
+  box-shadow: var(--shadow-sm);
+}
+
+@utility dashboard-container {
+  @apply rounded-2xl border border-border bg-card overflow-hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+@utility profit-positive {
+  @apply text-profit font-semibold;
+}
+
+@utility profit-negative {
+  @apply text-destructive font-semibold;
+}
+
+@utility animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+@utility animate-slide-up {
+  animation: slideUp 0.6s ease-out forwards;
+}
+
+@utility animate-scale-in {
+  animation: scaleIn 0.4s ease-out forwards;
+}
+
+@layer base {
+  :root {
+    /* Core Brand Colors */
+    --background: 0 0% 100%;
+    --foreground: 207 46% 20%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 207 46% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 207 46% 20%;
+
+    /* Deep Blue - Primary Trust Color */
+    --primary: 207 46% 31%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Lighter blue for secondary elements */
+    --secondary: 207 30% 96%;
+    --secondary-foreground: 207 46% 31%;
+
+    /* Muted states */
+    --muted: 210 20% 96%;
+    --muted-foreground: 207 20% 45%;
+
+    /* Accent - Bright Red for CTAs only */
+    --accent: 4 75% 57%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Destructive uses same red */
+    --destructive: 4 75% 57%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders and inputs */
+    --border: 210 20% 90%;
+    --input: 210 20% 90%;
+    --ring: 207 46% 31%;
+
+    --radius: 0.625rem;
+
+    /* Success/Profit green */
+    --profit: 152 60% 40%;
+    --profit-foreground: 0 0% 100%;
+
+    /* Warning for low margin */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    /* Sidebar */
+    --sidebar-background: 207 46% 31%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 207 46% 31%;
+    --sidebar-accent: 207 46% 38%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 207 46% 25%;
+    --sidebar-ring: 0 0% 100%;
+
+    /* Custom gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(207 46% 31%) 0%, hsl(207 46% 20%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 20% 98%) 100%);
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(207 46% 20% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(207 46% 20% / 0.08), 0 2px 4px -2px hsl(207 46% 20% / 0.06);
+    --shadow-lg: 0 10px 15px -3px hsl(207 46% 20% / 0.08), 0 4px 6px -4px hsl(207 46% 20% / 0.04);
+    --shadow-xl: 0 20px 25px -5px hsl(207 46% 20% / 0.1), 0 8px 10px -6px hsl(207 46% 20% / 0.06);
+    --shadow-card: 0 1px 3px hsl(207 46% 20% / 0.06), 0 1px 2px hsl(207 46% 20% / 0.04);
+    --shadow-card-hover: 0 10px 40px hsl(207 46% 20% / 0.12);
+  }
+
+  .dark {
+    --background: 207 46% 8%;
+    --foreground: 210 20% 98%;
+
+    --card: 207 46% 12%;
+    --card-foreground: 210 20% 98%;
+
+    --popover: 207 46% 12%;
+    --popover-foreground: 210 20% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 207 46% 31%;
+
+    --secondary: 207 46% 18%;
+    --secondary-foreground: 210 20% 98%;
+
+    --muted: 207 46% 18%;
+    --muted-foreground: 210 20% 65%;
+
+    --accent: 4 75% 57%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 4 75% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 207 46% 20%;
+    --input: 207 46% 20%;
+    --ring: 210 40% 80%;
+
+    --profit: 152 60% 50%;
+    --profit-foreground: 0 0% 100%;
+
+    --sidebar-background: 207 46% 10%;
+    --sidebar-foreground: 210 20% 98%;
+    --sidebar-primary: 210 40% 98%;
+    --sidebar-primary-foreground: 207 46% 31%;
+    --sidebar-accent: 207 46% 18%;
+    --sidebar-accent-foreground: 210 20% 98%;
+    --sidebar-border: 207 46% 18%;
+    --sidebar-ring: 210 40% 80%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'DM Sans', 'Inter', system-ui, sans-serif;
+    @apply tracking-tight;
+  }
+}
+
+@layer utilities {
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { 
+      opacity: 0; 
+      transform: translateY(20px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0); 
+    }
+  }
+
+  @keyframes scaleIn {
+    from { 
+      opacity: 0; 
+      transform: scale(0.95); 
+    }
+    to { 
+      opacity: 1; 
+      transform: scale(1); 
+    }
+  }
+}
+
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
