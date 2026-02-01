@@ -321,6 +321,84 @@ export const translations = {
       ecoFriendly: "Eco-friendly Stay",
     },
     
+    // Pricing
+    pricing: {
+      badge: "Τιμολόγηση",
+      headline: "Απλή τιμολόγηση, σαφές ROI",
+      subheadline: "Ένα booking που σώθηκε, πληρώνει το εργαλείο.",
+      previewHeadline: "Ένα booking που σώθηκε, πληρώνει το εργαλείο",
+      previewSubheadline: "Μία φορά + μηνιαίο fee. Ξεκίνα σήμερα.",
+      mostPopular: "Δημοφιλές",
+      oneTime: "από τη μία",
+      platformFee: "+ €{amount}/μήνα platform fee",
+      cta: "Ξεκίνα",
+      seeAllPlans: "Δες αναλυτικά τα πλάνα",
+      plans: {
+        starter: {
+          name: "Starter",
+          description: "Ιδανικό για hosts με ένα ακίνητο",
+        },
+        pro: {
+          name: "Pro",
+          description: "Για hosts με πολλά ακίνητα",
+        },
+        business: {
+          name: "Business",
+          description: "Για ξενοδοχεία και πολλαπλά σημεία",
+        },
+      },
+      features: {
+        nfcPlaque: "1 NFC + QR έξυπνη πλακέτα",
+        customLanding: "Custom landing page",
+        basicAnalytics: "Βασικά analytics",
+        emailSupport: "Υποστήριξη μέσω email",
+        englishGreek: "Αγγλικά & Ελληνικά",
+        smartPlaques5: "Έως 5 έξυπνες πλακέτες",
+        landingPages5: "5 custom landing pages",
+        advancedAnalytics: "Προηγμένα analytics",
+        prioritySupport: "Priority support",
+        multiLanguage: "Πολύγλωσσο",
+        abTesting: "A/B testing",
+        customBranding: "Custom branding",
+        smartPlaques20: "Έως 20 έξυπνες πλακέτες",
+        unlimitedLandingPages: "Απεριόριστες landing pages",
+        fullAnalyticsSuite: "Πλήρες analytics suite",
+        dedicatedAccountManager: "Dedicated account manager",
+        apiAccess: "API access",
+        teamCollaboration: "Ομαδική συνεργασία",
+        whiteLabel: "White-label επιλογή",
+        onboardingWorkshop: "Onboarding workshop",
+      },
+      roi: {
+        headline: "Πόσο κοστίζει να μην ξέρεις;",
+        description: "Μια κράτηση με κρυφό κόστος €100 είναι €100 λιγότερο κέρδος.",
+        roiLine: "Με €19/μήνα, αρκεί να εντοπίσεις 1 τέτοια κράτηση για να έχεις ROI.",
+        avgBenefit: "Μέσο όφελος ανά host",
+        avgValue: "€240/μήνα",
+        roiLabel: "ROI",
+        roiValue: "12x",
+      },
+      faq: {
+        title: "Συχνές Ερωτήσεις",
+        trial: {
+          q: "Υπάρχει δωρεάν δοκιμή;",
+          a: "Ναι, 14 ημέρες δωρεάν σε όλα τα πλάνα. Χωρίς πιστωτική κάρτα.",
+        },
+        change: {
+          q: "Μπορώ να αλλάξω πλάνο;",
+          a: "Φυσικά. Αναβάθμιση ή υποβάθμιση οποιαδήποτε στιγμή.",
+        },
+        technical: {
+          q: "Χρειάζεται τεχνικές γνώσεις;",
+          a: "Καθόλου. Σύνδεση με ένα κλικ, απλή καταχώρηση δεδομένων.",
+        },
+      },
+      ctaSection: {
+        headline: "Ξεκίνα σήμερα",
+        button: "Ξεκίνα",
+      },
+    },
+
     // NFC Page Editor
     nfcEditor: {
       title: "Live Editor",
@@ -693,6 +771,84 @@ export const translations = {
       ecoFriendly: "Eco-friendly Stay",
     },
     
+    // Pricing
+    pricing: {
+      badge: "Pricing",
+      headline: "Simple pricing, clear ROI",
+      subheadline: "One booking saved pays for the tool.",
+      previewHeadline: "One booking saved pays for the tool",
+      previewSubheadline: "One-time + monthly fee. Get started today.",
+      mostPopular: "Most Popular",
+      oneTime: "one-time",
+      platformFee: "+ €{amount}/mo platform fee",
+      cta: "Get Started",
+      seeAllPlans: "See all plans in detail",
+      plans: {
+        starter: {
+          name: "Starter",
+          description: "Perfect for single property hosts",
+        },
+        pro: {
+          name: "Pro",
+          description: "For hosts with multiple properties",
+        },
+        business: {
+          name: "Business",
+          description: "For hotels & multi-location businesses",
+        },
+      },
+      features: {
+        nfcPlaque: "1 NFC + QR smart plaque",
+        customLanding: "Custom landing page",
+        basicAnalytics: "Basic analytics",
+        emailSupport: "Email support",
+        englishGreek: "English & Greek",
+        smartPlaques5: "Up to 5 smart plaques",
+        landingPages5: "5 custom landing pages",
+        advancedAnalytics: "Advanced analytics",
+        prioritySupport: "Priority support",
+        multiLanguage: "Multi-language",
+        abTesting: "A/B testing",
+        customBranding: "Custom branding",
+        smartPlaques20: "Up to 20 smart plaques",
+        unlimitedLandingPages: "Unlimited landing pages",
+        fullAnalyticsSuite: "Full analytics suite",
+        dedicatedAccountManager: "Dedicated account manager",
+        apiAccess: "API access",
+        teamCollaboration: "Team collaboration",
+        whiteLabel: "White-label option",
+        onboardingWorkshop: "Onboarding workshop",
+      },
+      roi: {
+        headline: "What does not knowing cost you?",
+        description: "One booking with €100 hidden cost is €100 less profit.",
+        roiLine: "At €19/mo, finding just 1 such booking pays for itself.",
+        avgBenefit: "Average benefit per host",
+        avgValue: "€240/mo",
+        roiLabel: "ROI",
+        roiValue: "12x",
+      },
+      faq: {
+        title: "Frequently Asked Questions",
+        trial: {
+          q: "Is there a free trial?",
+          a: "Yes, 14 days free on all plans. No credit card required.",
+        },
+        change: {
+          q: "Can I change plans?",
+          a: "Absolutely. Upgrade or downgrade anytime.",
+        },
+        technical: {
+          q: "Do I need technical skills?",
+          a: "Not at all. One-click setup, simple data entry.",
+        },
+      },
+      ctaSection: {
+        headline: "Get started today",
+        button: "Get Started",
+      },
+    },
+
     // NFC Page Editor
     nfcEditor: {
       title: "Live Editor",

@@ -1,57 +1,16 @@
+"use client";
+
 import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Check, ArrowRight, Sparkles } from "lucide-react";
-
-const plans = [
-  {
-    name: "Starter",
-    price: "9",
-    description: "Για hosts με 1 ακίνητο που ξεκινούν.",
-    features: [
-      "1 ακίνητο",
-      "Κέρδος ανά κράτηση",
-      "Καταχώρηση κόστους",
-      "Μηνιαία αναφορά",
-      "NFC Guest Page",
-    ],
-    cta: "Ξεκίνα Δωρεάν",
-    popular: false,
-  },
-  {
-    name: "Pro",
-    price: "19",
-    description: "Για επαγγελματίες hosts με περισσότερα ακίνητα.",
-    features: [
-      "Έως 5 ακίνητα",
-      "Όλα τα Starter +",
-      "Alerts χαμηλού margin",
-      "Τάσεις κερδοφορίας",
-      "Εξαγωγή δεδομένων",
-      "Priority support",
-    ],
-    cta: "Δοκίμασε Pro",
-    popular: true,
-  },
-  {
-    name: "Operator",
-    price: "49",
-    description: "Για property managers με πολλά ακίνητα.",
-    features: [
-      "Απεριόριστα ακίνητα",
-      "Όλα τα Pro +",
-      "Multi-user access",
-      "API access",
-      "Custom reports",
-      "Dedicated support",
-    ],
-    cta: "Επικοινώνησε",
-    popular: false,
-  },
-];
+import { useLanguage } from "@/components/providers/LanguageProvider";
+import { PRICING_PLANS } from "@/lib/pricing";
 
 export default function Pricing() {
+  const { t } = useLanguage();
+
   return (
     <div className="min-h-screen">
       <Header />
@@ -62,15 +21,15 @@ export default function Pricing() {
             <div className="max-w-3xl mx-auto text-center">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-6">
                 <Sparkles className="w-4 h-4" />
-                <span className="text-sm font-medium">Τιμολόγηση</span>
+                <span className="text-sm font-medium">{t.pricing.badge}</span>
               </div>
 
               <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6">
-                Απλή τιμολόγηση, σαφές ROI
+                {t.pricing.headline}
               </h1>
 
               <p className="text-xl text-muted-foreground">
-                Ένα booking που σώθηκε, πληρώνει το εργαλείο.
+                {t.pricing.subheadline}
               </p>
             </div>
           </div>
@@ -80,90 +39,128 @@ export default function Pricing() {
         <section className="py-20 lg:py-28 bg-background">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              {plans.map((plan) => (
-                <div
-                  key={plan.name}
-                  className={`relative bg-card rounded-2xl border p-8 ${
-                    plan.popular
-                      ? "border-primary shadow-xl scale-105"
-                      : "border-border"
-                  }`}
-                >
-                  {plan.popular && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-primary text-primary-foreground text-sm font-semibold">
-                      Δημοφιλές
-                    </div>
-                  )}
+              {PRICING_PLANS.map((plan) => {
+                const planT = t.pricing.plans[plan.id];
+                const isPopular = plan.popular;
+                return (
+                  <div
+                    key={plan.id}
+                    className={`relative rounded-2xl border p-8 ${
+                      isPopular
+                        ? "bg-foreground border-foreground shadow-xl scale-105 text-background"
+                        : "bg-card border-border"
+                    }`}
+                  >
+                    {isPopular && (
+                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-primary text-primary-foreground text-sm font-semibold">
+                        {t.pricing.mostPopular}
+                      </div>
+                    )}
 
-                  <div className="text-center mb-8">
-                    <h3 className="font-display font-bold text-2xl text-foreground mb-2">
-                      {plan.name}
-                    </h3>
-                    <p className="text-muted-foreground text-sm mb-4">
-                      {plan.description}
-                    </p>
-                    <div className="flex items-baseline justify-center gap-1">
-                      <span className="font-display font-bold text-5xl text-foreground">
-                        €{plan.price}
-                      </span>
-                      <span className="text-muted-foreground">/μήνα</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      ανά ακίνητο
-                    </p>
-                  </div>
-
-                  <ul className="space-y-3 mb-8">
-                    {plan.features.map((feature) => (
-                      <li
-                        key={feature}
-                        className="flex items-center gap-3 text-foreground"
+                    <div className="text-center mb-8">
+                      <h3
+                        className={`font-display font-bold text-2xl mb-2 ${
+                          isPopular ? "text-background" : "text-foreground"
+                        }`}
                       >
-                        <Check className="w-5 h-5 text-profit flex-shrink-0" />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
+                        {planT.name}
+                      </h3>
+                      <p
+                        className={`text-sm mb-4 ${
+                          isPopular ? "text-background/80" : "text-muted-foreground"
+                        }`}
+                      >
+                        {planT.description}
+                      </p>
+                      <div
+                        className={`flex flex-col items-center gap-0 ${
+                          isPopular ? "text-background" : "text-foreground"
+                        }`}
+                      >
+                        <span className="font-display font-bold text-5xl">
+                          €{plan.oneTimeCents / 100}
+                        </span>
+                        <span
+                          className={
+                            isPopular ? "text-background/80" : "text-muted-foreground"
+                          }
+                        >
+                          /{t.pricing.oneTime}
+                        </span>
+                        <p
+                          className={`text-sm mt-1 ${
+                            isPopular ? "text-background/80" : "text-muted-foreground"
+                          }`}
+                        >
+                          {t.pricing.platformFee.replace(
+                            "{amount}",
+                            String(plan.monthlyCents / 100)
+                          )}
+                        </p>
+                      </div>
+                    </div>
 
-                  <Link href="/dashboard" className="block">
-                    <Button
-                      variant={plan.popular ? "cta" : "outline-primary"}
-                      className="w-full"
-                      size="lg"
-                    >
-                      {plan.cta}
-                    </Button>
-                  </Link>
-                </div>
-              ))}
+                    <ul className="space-y-3 mb-8">
+                      {plan.featureKeys.map((key) => (
+                        <li
+                          key={key}
+                          className={`flex items-center gap-3 ${
+                            isPopular ? "text-background" : "text-foreground"
+                          }`}
+                        >
+                          <Check
+                            className={`w-5 h-5 flex-shrink-0 ${
+                              isPopular ? "text-primary" : "text-profit"
+                            }`}
+                          />
+                          <span className="text-sm">
+                            {t.pricing.features[key as keyof typeof t.pricing.features]}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <Link href="/dashboard" className="block">
+                      <Button
+                        variant={isPopular ? "cta" : "outline-primary"}
+                        className="w-full"
+                        size="lg"
+                      >
+                        {t.pricing.cta}
+                      </Button>
+                    </Link>
+                  </div>
+                );
+              })}
             </div>
 
             {/* ROI Callout */}
             <div className="mt-16 max-w-3xl mx-auto">
               <div className="bg-primary/5 rounded-2xl border border-primary/20 p-8 text-center">
                 <h3 className="font-display font-bold text-2xl text-foreground mb-4">
-                  Πόσο κοστίζει να μην ξέρεις;
+                  {t.pricing.roi.headline}
                 </h3>
                 <p className="text-muted-foreground mb-6">
-                  Μια κράτηση με κρυφό κόστος €100 είναι €100 λιγότερο κέρδος.
+                  {t.pricing.roi.description}
                   <br />
-                  Με €19/μήνα, αρκεί να εντοπίσεις <strong>1 τέτοια κράτηση</strong>{" "}
-                  για να έχεις ROI.
+                  {t.pricing.roi.roiLine}
                 </p>
                 <div className="inline-flex items-center gap-4 p-4 rounded-xl bg-card border border-border">
                   <div className="text-left">
                     <p className="text-sm text-muted-foreground">
-                      Μέσο όφελος ανά host
+                      {t.pricing.roi.avgBenefit}
                     </p>
                     <p className="font-display font-bold text-2xl text-profit">
-                      €240/μήνα
+                      {t.pricing.roi.avgValue}
                     </p>
                   </div>
                   <div className="w-px h-12 bg-border" />
                   <div className="text-left">
-                    <p className="text-sm text-muted-foreground">ROI</p>
+                    <p className="text-sm text-muted-foreground">
+                      {t.pricing.roi.roiLabel}
+                    </p>
                     <p className="font-display font-bold text-2xl text-foreground">
-                      12x
+                      {t.pricing.roi.roiValue}
                     </p>
                   </div>
                 </div>
@@ -177,34 +174,34 @@ export default function Pricing() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto">
               <h2 className="font-display text-3xl font-bold text-foreground mb-12 text-center">
-                Συχνές Ερωτήσεις
+                {t.pricing.faq.title}
               </h2>
 
               <div className="space-y-6">
                 <div className="bg-card rounded-xl border border-border p-6">
                   <h4 className="font-semibold text-foreground mb-2">
-                    Υπάρχει δωρεάν δοκιμή;
+                    {t.pricing.faq.trial.q}
                   </h4>
                   <p className="text-muted-foreground">
-                    Ναι, 14 ημέρες δωρεάν σε όλα τα πλάνα. Χωρίς πιστωτική κάρτα.
+                    {t.pricing.faq.trial.a}
                   </p>
                 </div>
 
                 <div className="bg-card rounded-xl border border-border p-6">
                   <h4 className="font-semibold text-foreground mb-2">
-                    Μπορώ να αλλάξω πλάνο;
+                    {t.pricing.faq.change.q}
                   </h4>
                   <p className="text-muted-foreground">
-                    Φυσικά. Αναβάθμιση ή υποβάθμιση οποιαδήποτε στιγμή.
+                    {t.pricing.faq.change.a}
                   </p>
                 </div>
 
                 <div className="bg-card rounded-xl border border-border p-6">
                   <h4 className="font-semibold text-foreground mb-2">
-                    Χρειάζεται τεχνικές γνώσεις;
+                    {t.pricing.faq.technical.q}
                   </h4>
                   <p className="text-muted-foreground">
-                    Καθόλου. Σύνδεση με ένα κλικ, απλή καταχώρηση δεδομένων.
+                    {t.pricing.faq.technical.a}
                   </p>
                 </div>
               </div>
@@ -216,11 +213,11 @@ export default function Pricing() {
         <section className="py-20 lg:py-28 hero-gradient">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="font-display text-3xl sm:text-4xl font-bold text-primary-foreground mb-6">
-              Ξεκίνα σήμερα με 14 ημέρες δωρεάν
+              {t.pricing.ctaSection.headline}
             </h2>
             <Link href="/dashboard">
               <Button variant="cta" size="xl">
-                Δοκίμασε Δωρεάν
+                {t.pricing.ctaSection.button}
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </Link>
