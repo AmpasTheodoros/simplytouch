@@ -1,22 +1,27 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, DM_Sans } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { LanguageProvider } from "@/components/providers/LanguageProvider";
+import { PropertyProvider } from "@/components/providers/PropertyProvider";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
+  weight: ["500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "ProfitBnB - Γνώρισε το πραγματικό σου κέρδος ανά κράτηση",
+  title: "SimplyTouch - Γνώρισε το πραγματικό σου κέρδος ανά κράτηση",
   description: "Η πλατφόρμα που δείχνει το πραγματικό κέρδος ανά κράτηση. Όχι έσοδα. Πραγματικό κέρδος. Ρεύμα, νερό, καθαρισμός, όλα υπολογισμένα αυτόματα.",
-  keywords: ["Airbnb", "profit tracking", "booking management", "vacation rental", "ProfitBnB", "host tools"],
+  keywords: ["Airbnb", "profit tracking", "booking management", "vacation rental", "SimplyTouch", "host tools"],
 };
 
 export default function RootLayout({
@@ -26,11 +31,17 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="el">
+      <html lang="el" suppressHydrationWarning>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
+          className={`${inter.variable} ${dmSans.variable} antialiased font-sans`}
         >
-          {children}
+          <ThemeProvider>
+            <LanguageProvider>
+              <PropertyProvider>
+                {children}
+              </PropertyProvider>
+            </LanguageProvider>
+          </ThemeProvider>
         </body>
       </html>
     </ClerkProvider>

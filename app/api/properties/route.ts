@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
         userId: user.id,
         name: validated.data.name,
         timezone: validated.data.timezone || DEFAULT_TIMEZONE,
+        pricePerWh: validated.data.pricePerWh,
         icalUrl: validated.data.icalUrl,
       },
     });

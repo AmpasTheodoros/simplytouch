@@ -1,0 +1,82 @@
+---
+description: Zod validation schema patterns
+globs: "**/lib/validation/*.ts"
+alwaysApply: false
+---
+
+# Validation Schema Patterns
+
+## Schema Structure
+
+Create separate schemas for create and update operations:
+
+```typescript
+import { z } from "zod";
+
+// Create schema - all required fields
+export const createResourceSchema = z.object({
+  propertyId: z.string().cuid(),
+  name: z.string().min(1),
+  amountCents: z.number().int().min(0),
+  startAt: z.string().datetime(),
+});
+
+// Update schema - all fields optional
+export const updateResourceSchema = z.object({
+  name: z.string().min(1).optional(),
+  amountCents: z.number().int().min(0).optional(),
+  status: z.enum(["ACTIVE", "COMPLETED", "CANCELLED"]).optional(),
+});
+
+// Export inferred types
+export type CreateResourceInput = z.infer<typeof createResourceSchema>;
+export type UpdateResourceInput = z.infer<typeof updateResourceSchema>;
+```
+
+## Common Validators
+
+```typescript
+// IDs
+z.string().cuid()
+
+// Money (stored as cents)
+z.number().int().min(0)
+
+// Dates
+z.string().datetime()
+
+// Enums (use constants from lib/constants.ts)
+import { BOOKING_SOURCES } from "../constants";
+z.enum(BOOKING_SOURCES)
+
+// URLs
+z.string().url()
+
+// Optional with default
+z.number().int().min(0).default(0)
+```
+
+## Usage in API Routes
+
+```typescript
+import { createResourceSchema } from "@/lib/validation/resource";
+
+const validated = createResourceSchema.safeParse(body);
+if (!validated.success) {
+  return NextResponse.json(
+    { error: "Validation error", details: validated.error.flatten() },
+    { status: 400 }
+  );
+}
+
+// Use validated.data with full type safety
+const { propertyId, name } = validated.data;
+```
+
+## File Naming
+
+Place validation schemas in `lib/validation/[resource].ts`:
+
+- `lib/validation/booking.ts`
+- `lib/validation/property.ts`
+- `lib/validation/expense.ts`

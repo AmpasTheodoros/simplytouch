@@ -42,7 +42,7 @@ export function TestimonialsSection() {
           </h2>
 
           <p className="text-lg text-muted-foreground">
-            Δες πώς άλλοι hosts βελτίωσαν την κερδοφορία τους με το ProfitBnB.
+            Δες πώς άλλοι hosts βελτίωσαν την κερδοφορία τους με το SimplyTouch.
           </p>
         </div>
 

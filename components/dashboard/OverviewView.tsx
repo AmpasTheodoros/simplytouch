@@ -1,13 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowUpRight, ArrowDownRight, ChevronDown } from "lucide-react";
+import { useProperty } from "@/components/providers/PropertyProvider";
+import { useLanguage } from "@/components/providers/LanguageProvider";
+import PropertyFilter, { ALL_PROPERTIES } from "@/components/dashboard/PropertyFilter";
 import type { OverviewStats, BookingWithAllocation } from "@/lib/queries/dashboard";
 
-interface OverviewViewProps {
-  stats?: OverviewStats;
-  bookings?: BookingWithAllocation[];
+interface BookingWithProperty extends BookingWithAllocation {
   propertyName?: string;
+}
+
+interface OverviewViewProps {
+  initialStats?: OverviewStats;
+  initialBookings?: BookingWithAllocation[];
+  initialPropertyName?: string;
 }
 
 // Helper to format cents as euros
@@ -35,8 +42,60 @@ function formatDateRange(startAt: Date, endAt: Date): string {
   return `${startDay}-${endDay} ${month}`;
 }
 
-export default function OverviewView({ stats, bookings = [], propertyName }: OverviewViewProps) {
+export default function OverviewView({ 
+  initialStats, 
+  initialBookings = [], 
+  initialPropertyName 
+}: OverviewViewProps) {
+  const { properties } = useProperty();
+  const { t } = useLanguage();
+  
   const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
+  const [filterPropertyId, setFilterPropertyId] = useState<string>(ALL_PROPERTIES);
+  const [stats, setStats] = useState<OverviewStats | null>(initialStats || null);
+  const [bookings, setBookings] = useState<BookingWithProperty[]>(initialBookings);
+  const [propertyName, setPropertyName] = useState(initialPropertyName || "");
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch data when filter changes
+  useEffect(() => {
+    async function fetchData() {
+      // Only fetch if we have properties loaded
+      if (properties.length === 0) return;
+      
+      setIsLoading(true);
+      try {
+        const now = new Date();
+        const params = new URLSearchParams({
+          year: String(now.getFullYear()),
+          month: String(now.getMonth() + 1),
+        });
+
+        if (filterPropertyId === ALL_PROPERTIES) {
+          params.set("viewAll", "true");
+        } else {
+          params.set("propertyId", filterPropertyId);
+        }
+
+        const res = await fetch(`/api/dashboard/overview?${params}`);
+        if (res.ok) {
+          const data = await res.json();
+          setStats(data.stats);
+          setBookings(data.bookings || []);
+          setPropertyName(data.propertyName || "");
+        }
+      } catch (error) {
+        console.error("Failed to fetch overview data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchData();
+  }, [filterPropertyId, properties.length]);
+
+  // Show property column when viewing all properties
+  const showPropertyColumn = filterPropertyId === ALL_PROPERTIES;
 
   // Use provided stats or defaults
   const totalRevenue = stats?.totalRevenueCents ?? 0;
@@ -47,11 +106,19 @@ export default function OverviewView({ stats, bookings = [], propertyName }: Ove
 
   return (
     <>
+      {/* Property Filter Dropdown */}
+      <PropertyFilter
+        value={filterPropertyId}
+        onChange={setFilterPropertyId}
+        isLoading={isLoading}
+        className="mb-6"
+      />
+
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div className="bg-card rounded-xl border border-border p-6">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-sm text-muted-foreground">Κρατήσεις</p>
+            <p className="text-sm text-muted-foreground">{t.overview?.bookings || "Κρατήσεις"}</p>
           </div>
           <p className="font-display font-bold text-3xl text-foreground">
             {totalBookings}
@@ -60,7 +127,7 @@ export default function OverviewView({ stats, bookings = [], propertyName }: Ove
 
         <div className="bg-card rounded-xl border border-border p-6">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-sm text-muted-foreground">Συνολικά Έσοδα</p>
+            <p className="text-sm text-muted-foreground">{t.overview?.totalRevenue || "Συνολικά Έσοδα"}</p>
             <ArrowUpRight className="w-4 h-4 text-profit" />
           </div>
           <p className="font-display font-bold text-3xl text-foreground">
@@ -70,7 +137,7 @@ export default function OverviewView({ stats, bookings = [], propertyName }: Ove
 
         <div className="bg-card rounded-xl border border-border p-6">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-sm text-muted-foreground">Συνολικά Κόστη</p>
+            <p className="text-sm text-muted-foreground">{t.overview?.totalCosts || "Συνολικά Κόστη"}</p>
             <ArrowDownRight className="w-4 h-4 text-accent" />
           </div>
           <p className="font-display font-bold text-3xl text-foreground">
@@ -80,9 +147,9 @@ export default function OverviewView({ stats, bookings = [], propertyName }: Ove
 
         <div className="bg-profit/5 rounded-xl border border-profit/20 p-6">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-sm text-muted-foreground">Καθαρό Κέρδος</p>
+            <p className="text-sm text-muted-foreground">{t.overview?.netProfit || "Καθαρό Κέρδος"}</p>
             <span className="text-xs px-2 py-0.5 rounded-full bg-profit/20 text-profit font-medium">
-              {avgMargin.toFixed(1)}% margin
+              {avgMargin.toFixed(1)}% {t.overview?.margin?.toLowerCase() || "margin"}
             </span>
           </div>
           <p className="font-display font-bold text-3xl text-profit">
@@ -95,17 +162,17 @@ export default function OverviewView({ stats, bookings = [], propertyName }: Ove
       <div className="bg-card rounded-xl border border-border overflow-hidden">
         <div className="p-6 border-b border-border flex items-center justify-between">
           <h2 className="font-display font-semibold text-lg text-foreground">
-            Κρατήσεις Μήνα
+            {t.overview?.monthlyBookings || "Κρατήσεις Μήνα"}
           </h2>
           <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            Φίλτρα
+            {t.overview?.filters || "Φίλτρα"}
             <ChevronDown className="w-4 h-4" />
           </button>
         </div>
 
         {bookings.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
-            Δεν υπάρχουν κρατήσεις αυτόν τον μήνα
+            {t.overview?.noBookingsThisMonth || "Δεν υπάρχουν κρατήσεις αυτόν τον μήνα"}
           </div>
         ) : (
         <div className="overflow-x-auto">
@@ -113,22 +180,27 @@ export default function OverviewView({ stats, bookings = [], propertyName }: Ove
             <thead className="bg-secondary/50">
               <tr>
                 <th className="text-left p-4 font-medium text-muted-foreground text-sm">
-                  Επισκέπτης
+                  {t.overview?.guest || "Επισκέπτης"}
                 </th>
+                {showPropertyColumn && (
+                  <th className="text-left p-4 font-medium text-muted-foreground text-sm">
+                    {t.overview?.property || "Ακίνητο"}
+                  </th>
+                )}
                 <th className="text-left p-4 font-medium text-muted-foreground text-sm">
-                  Ημ/νίες
+                  {t.overview?.dates || "Ημ/νίες"}
                 </th>
                 <th className="text-right p-4 font-medium text-muted-foreground text-sm">
-                  Έσοδα
+                  {t.overview?.revenue || "Έσοδα"}
                 </th>
                 <th className="text-right p-4 font-medium text-muted-foreground text-sm">
-                  Κόστη
+                  {t.overview?.costs || "Κόστη"}
                 </th>
                 <th className="text-right p-4 font-medium text-muted-foreground text-sm">
-                  Κέρδος
+                  {t.overview?.profit || "Κέρδος"}
                 </th>
                 <th className="text-right p-4 font-medium text-muted-foreground text-sm">
-                  Margin
+                  {t.overview?.margin || "Margin"}
                 </th>
               </tr>
             </thead>
@@ -161,14 +233,19 @@ export default function OverviewView({ stats, bookings = [], propertyName }: Ove
                       </div>
                       <div>
                         <p className="font-medium text-foreground">
-                          {booking.guestName || "Άγνωστος"}
+                          {booking.guestName || (t.overview?.unknownGuest || "Άγνωστος")}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {booking.nights} νύχτ{booking.nights > 1 ? "ες" : "α"}
+                          {booking.nights} {booking.nights > 1 ? (t.overview?.nights || "νύχτες") : (t.overview?.night || "νύχτα")}
                         </p>
                       </div>
                     </div>
                   </td>
+                  {showPropertyColumn && (
+                    <td className="p-4 text-muted-foreground text-sm">
+                      {booking.propertyName || "-"}
+                    </td>
+                  )}
                   <td className="p-4 text-muted-foreground">
                     {formatDateRange(booking.startAt, booking.endAt)}
                   </td>
@@ -217,14 +294,14 @@ export default function OverviewView({ stats, bookings = [], propertyName }: Ove
               return (
                 <div>
                   <h3 className="font-semibold text-foreground mb-4">
-                    Ανάλυση Κόστους: {booking.guestName || "Άγνωστος"}
+                    {t.overview?.costAnalysis || "Ανάλυση Κόστους"}: {booking.guestName || (t.overview?.unknownGuest || "Άγνωστος")}
                   </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <div className="p-4 rounded-lg bg-card border border-border">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-lg">⚡</span>
                         <span className="text-sm text-muted-foreground">
-                          Ρεύμα
+                          {t.overview?.electricity || "Ρεύμα"}
                         </span>
                       </div>
                       <p className="font-semibold text-foreground">
@@ -235,7 +312,7 @@ export default function OverviewView({ stats, bookings = [], propertyName }: Ove
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-lg">🧹</span>
                         <span className="text-sm text-muted-foreground">
-                          Καθαρισμός
+                          {t.overview?.cleaning || "Καθαρισμός"}
                         </span>
                       </div>
                       <p className="font-semibold text-foreground">
@@ -246,7 +323,7 @@ export default function OverviewView({ stats, bookings = [], propertyName }: Ove
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-lg">📅</span>
                         <span className="text-sm text-muted-foreground">
-                          Σταθερά
+                          {t.overview?.fixedCosts || "Σταθερά"}
                         </span>
                       </div>
                       <p className="font-semibold text-foreground">
@@ -257,7 +334,7 @@ export default function OverviewView({ stats, bookings = [], propertyName }: Ove
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-lg">💰</span>
                         <span className="text-sm text-muted-foreground">
-                          Platform Fee
+                          {t.overview?.platformFee || "Platform Fee"}
                         </span>
                       </div>
                       <p className="font-semibold text-foreground">
@@ -267,7 +344,7 @@ export default function OverviewView({ stats, bookings = [], propertyName }: Ove
                   </div>
                   {!allocation && (
                     <p className="mt-4 text-sm text-muted-foreground">
-                      Το κόστος δεν έχει υπολογιστεί ακόμα. Θα υπολογιστεί αυτόματα μετά τη λήξη της κράτησης.
+                      {t.overview?.costNotCalculated || "Το κόστος δεν έχει υπολογιστεί ακόμα. Θα υπολογιστεί αυτόματα μετά τη λήξη της κράτησης."}
                     </p>
                   )}
                 </div>

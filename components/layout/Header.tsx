@@ -28,7 +28,7 @@ export function Header() {
               <span className="text-primary-foreground font-bold text-lg">P</span>
             </div>
             <span className="font-display font-bold text-xl text-primary">
-              ProfitBnB
+              SimplyTouch
             </span>
           </Link>
 

@@ -1,0 +1,106 @@
+---
+description: Prisma and database patterns for SimplyTouch
+globs: "**/{schema.prisma,*.ts}"
+alwaysApply: false
+---
+
+# Prisma & Database Patterns
+
+## Schema Conventions
+
+### IDs and Relations
+
+```prisma
+model Resource {
+  id         String   @id @default(cuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([propertyId])
+}
+```
+
+### Money Fields
+
+Store as cents with descriptive names:
+
+```prisma
+payoutCents      Int @default(0)
+costCents        Int @default(0)
+electricityCostCents Int @default(0)
+```
+
+### Enums
+
+Use PascalCase for enum values:
+
+```prisma
+enum BookingStatus {
+  UPCOMING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+```
+
+## Database Client
+
+Import from the centralized db module:
+
+```typescript
+import { db } from "@/lib/db";
+
+const bookings = await db.booking.findMany({
+  where: { propertyId },
+  orderBy: { startAt: "desc" },
+  include: {
+    costAllocation: true,
+    cleaningEvent: true,
+  },
+});
+```
+
+## Common Queries
+
+### Filter by date range
+
+```typescript
+const startOfMonth = new Date(Date.UTC(year, monthNum - 1, 1));
+const endOfMonth = new Date(Date.UTC(year, monthNum, 0, 23, 59, 59, 999));
+
+const bookings = await db.booking.findMany({
+  where: {
+    propertyId,
+    startAt: { lte: endOfMonth },
+    endAt: { gte: startOfMonth },
+  },
+});
+```
+
+### Create with computed fields
+
+```typescript
+const nights = Math.ceil(
+  (endAt.getTime() - startAt.getTime()) / (1000 * 60 * 60 * 24)
+);
+
+await db.booking.create({
+  data: {
+    propertyId,
+    startAt,
+    endAt,
+    nights,
+    status: startAt > new Date() ? "UPCOMING" : "ACTIVE",
+  },
+});
+```
+
+## Commands
+
+- Generate client: `npm run db:generate`
+- Run migrations: `npm run db:migrate`
+- Push schema: `npm run db:push`
+- Open studio: `npm run db:studio`
+- Seed database: `npm run db:seed`

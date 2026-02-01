@@ -2,18 +2,22 @@ import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
+import { NFCLiveEditor } from "@/components/nfc/NFCLiveEditor";
 import {
   Smartphone,
-  Edit3,
-  Eye,
   Wifi,
   Image,
   FileText,
   Link as LinkIcon,
   Leaf,
   ArrowRight,
-  Check,
+  Menu,
+  MapPin,
+  Phone,
 } from "lucide-react";
+
+// Default background for guest page preview
+const PREVIEW_BG = "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80";
 
 const editableElements = [
   { icon: FileText, label: "House rules & οδηγίες" },
@@ -114,30 +118,53 @@ export default function NFCPage() {
                           Guest Page Preview
                         </h4>
                         <p className="text-sm text-muted-foreground">
-                          yourproperty.profitbnb.app
+                          yourproperty.SimplyTouch.app
                         </p>
                       </div>
                     </div>
 
-                    {/* Mock Phone Screen */}
-                    <div className="bg-secondary/50 rounded-xl p-4 space-y-4">
-                      <div className="h-24 bg-primary/10 rounded-lg flex items-center justify-center">
-                        <Image className="w-8 h-8 text-primary/50" />
-                      </div>
-                      <div>
-                        <h5 className="font-semibold text-foreground">
-                          Καλώς ήρθατε!
-                        </h5>
-                        <p className="text-sm text-muted-foreground">
-                          Wi-Fi: MyNetwork • Pass: guest123
-                        </p>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="p-3 bg-card rounded-lg text-center text-sm">
-                          🏠 House Rules
+                    {/* Mock Phone Screen - New Hero Design */}
+                    <div 
+                      className="rounded-xl overflow-hidden"
+                      style={{
+                        background: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url("${PREVIEW_BG}")`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                      }}
+                    >
+                      {/* Header */}
+                      <div className="flex items-center justify-between px-4 py-3">
+                        <div className="flex items-center gap-1">
+                          <span className="text-white text-sm font-medium">Seaside Apartment</span>
+                          <span className="text-rose-400 text-xs">&#10047;</span>
                         </div>
-                        <div className="p-3 bg-card rounded-lg text-center text-sm">
-                          🚿 Οδηγίες
+                        <Menu className="w-4 h-4 text-white" />
+                      </div>
+
+                      {/* Title */}
+                      <div className="text-center py-6">
+                        <h5 className="font-serif italic text-white text-2xl mb-1">Seaside</h5>
+                        <p className="text-white/60 text-[10px] tracking-[0.2em] uppercase">Apartment</p>
+                      </div>
+
+                      {/* Nav Links */}
+                      <div className="flex flex-col items-center gap-2 pb-4">
+                        <span className="text-white text-xs tracking-[0.15em]">WELCOME</span>
+                        <span className="text-white text-xs tracking-[0.15em]">HOUSE RULES</span>
+                        <span className="text-white text-xs tracking-[0.15em]">AMENITIES</span>
+                        <span className="text-white text-xs tracking-[0.15em]">EXPLORE</span>
+                        <span className="text-white/40 text-xs tracking-[0.15em]">GALLERY</span>
+                      </div>
+
+                      {/* Bottom Buttons */}
+                      <div className="flex justify-center gap-2 px-4 pb-4">
+                        <div className="flex items-center gap-1 px-3 py-1.5 bg-white/90 rounded-full">
+                          <MapPin className="w-3 h-3 text-gray-700" />
+                          <span className="text-[10px] text-gray-700 font-medium">Location</span>
+                        </div>
+                        <div className="flex items-center gap-1 px-3 py-1.5 bg-primary rounded-full">
+                          <Phone className="w-3 h-3 text-white" />
+                          <span className="text-[10px] text-white font-medium">Contact</span>
                         </div>
                       </div>
                     </div>
@@ -177,118 +204,8 @@ export default function NFCPage() {
           </div>
         </section>
 
-        {/* Editor vs Guest View */}
-        <section className="py-20 lg:py-28 bg-background">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-5xl mx-auto">
-              <h2 className="font-display text-3xl font-bold text-foreground mb-12 text-center">
-                Host Editor vs Guest View
-              </h2>
-
-              <div className="grid lg:grid-cols-2 gap-8">
-                {/* Editor */}
-                <div className="bg-card rounded-2xl border border-border overflow-hidden">
-                  <div className="p-4 bg-primary text-primary-foreground flex items-center gap-2">
-                    <Edit3 className="w-5 h-5" />
-                    <span className="font-semibold">Host Editor</span>
-                  </div>
-                  <div className="p-6 space-y-4">
-                    <div>
-                      <label className="text-sm font-medium text-foreground mb-2 block">
-                        Τίτλος καλωσορίσματος
-                      </label>
-                      <input
-                        type="text"
-                        defaultValue="Καλώς ήρθατε στο κατάλυμά μας!"
-                        className="w-full p-3 rounded-lg border border-border bg-secondary/30 text-foreground"
-                        readOnly
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-foreground mb-2 block">
-                        Wi-Fi Password
-                      </label>
-                      <input
-                        type="text"
-                        defaultValue="guest2025"
-                        className="w-full p-3 rounded-lg border border-border bg-secondary/30 text-foreground"
-                        readOnly
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-foreground mb-2 block">
-                        House Rules
-                      </label>
-                      <textarea
-                        defaultValue="• Απαγορεύεται το κάπνισμα&#10;• Ησυχία μετά τις 23:00&#10;• Check-out στις 11:00"
-                        className="w-full p-3 rounded-lg border border-border bg-secondary/30 text-foreground h-24 resize-none"
-                        readOnly
-                      />
-                    </div>
-                    <Button className="w-full" variant="default">
-                      Αποθήκευση Αλλαγών
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Guest View */}
-                <div className="bg-card rounded-2xl border border-border overflow-hidden">
-                  <div className="p-4 bg-secondary flex items-center gap-2">
-                    <Eye className="w-5 h-5 text-muted-foreground" />
-                    <span className="font-semibold text-foreground">
-                      Guest View
-                    </span>
-                  </div>
-                  <div className="p-6">
-                    <div className="bg-primary/5 rounded-xl p-6 text-center mb-6">
-                      <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                        <span className="text-3xl">🏠</span>
-                      </div>
-                      <h3 className="font-display font-bold text-xl text-foreground mb-2">
-                        Καλώς ήρθατε στο κατάλυμά μας!
-                      </h3>
-                      <p className="text-muted-foreground">
-                        Ελπίζουμε να περάσετε υπέροχα!
-                      </p>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div className="p-4 rounded-lg bg-secondary/50 flex items-center gap-3">
-                        <Wifi className="w-5 h-5 text-primary" />
-                        <div>
-                          <p className="text-sm text-muted-foreground">Wi-Fi</p>
-                          <p className="font-medium text-foreground">
-                            Password: guest2025
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="p-4 rounded-lg bg-secondary/50">
-                        <p className="text-sm text-muted-foreground mb-2">
-                          House Rules
-                        </p>
-                        <ul className="text-sm text-foreground space-y-1">
-                          <li className="flex items-center gap-2">
-                            <Check className="w-4 h-4 text-profit" />
-                            Απαγορεύεται το κάπνισμα
-                          </li>
-                          <li className="flex items-center gap-2">
-                            <Check className="w-4 h-4 text-profit" />
-                            Ησυχία μετά τις 23:00
-                          </li>
-                          <li className="flex items-center gap-2">
-                            <Check className="w-4 h-4 text-profit" />
-                            Check-out στις 11:00
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* Live Editor Section */}
+        <NFCLiveEditor />
 
         {/* CTA */}
         <section className="py-20 lg:py-28 hero-gradient">

@@ -1,164 +1,236 @@
 "use client";
 
-import { TrendingUp, TrendingDown, Calendar, Euro, Percent, BarChart3 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { TrendingUp, TrendingDown, Calendar, Euro, Percent, BarChart3, Loader2 } from "lucide-react";
+import PropertyFilter, { ALL_PROPERTIES } from "@/components/dashboard/PropertyFilter";
+import { useProperty } from "@/components/providers/PropertyProvider";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
-const monthlyData = [
-  { month: "Σεπ", revenue: 1200, costs: 380, profit: 820 },
-  { month: "Οκτ", revenue: 1450, costs: 420, profit: 1030 },
-  { month: "Νοε", revenue: 980, costs: 340, profit: 640 },
-  { month: "Δεκ", revenue: 1680, costs: 510, profit: 1170 },
-  { month: "Ιαν", revenue: 1200, costs: 317, profit: 883 },
-  { month: "Φεβ", revenue: 1350, costs: 390, profit: 960 },
-];
+interface MonthlyData {
+  month: string;
+  revenue: number;
+  costs: number;
+  profit: number;
+}
 
-const costBreakdown = [
-  { category: "Ρεύμα", current: 60, previous: 72, change: -16.7 },
-  { category: "Νερό", current: 16, previous: 19, change: -15.8 },
-  { category: "Καθαρισμός", current: 180, previous: 180, change: 0 },
-  { category: "Σταθερά", current: 61, previous: 61, change: 0 },
-];
+interface CostBreakdown {
+  category: string;
+  current: number;
+  previous: number;
+  change: number;
+}
 
-const occupancyData = [
-  { month: "Σεπ", rate: 65 },
-  { month: "Οκτ", rate: 78 },
-  { month: "Νοε", rate: 52 },
-  { month: "Δεκ", rate: 85 },
-  { month: "Ιαν", rate: 33 },
-  { month: "Φεβ", rate: 45 },
-];
+interface OccupancyData {
+  month: string;
+  rate: number;
+}
 
 export default function TrendsView() {
-  const currentMonthProfit = monthlyData[monthlyData.length - 2].profit;
-  const previousMonthProfit = monthlyData[monthlyData.length - 3].profit;
-  const profitChange = ((currentMonthProfit - previousMonthProfit) / previousMonthProfit) * 100;
+  const { t } = useLanguage();
+  const { properties } = useProperty();
+  const [filterPropertyId, setFilterPropertyId] = useState<string>(ALL_PROPERTIES);
+  const [isLoading, setIsLoading] = useState(true);
+  const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
+  const [costBreakdown, setCostBreakdown] = useState<CostBreakdown[]>([]);
+  const [occupancyData, setOccupancyData] = useState<OccupancyData[]>([]);
 
-  const avgMargin = monthlyData.reduce((sum, m) => sum + (m.profit / m.revenue) * 100, 0) / monthlyData.length;
+  // Fetch trends data when property filter changes
+  useEffect(() => {
+    async function fetchTrendsData() {
+      setIsLoading(true);
+      
+      // For now, show empty state since trends API doesn't exist yet
+      // In the future, this would fetch from /api/trends?propertyId=...
+      try {
+        // Placeholder: Reset data when switching properties
+        setMonthlyData([]);
+        setCostBreakdown([]);
+        setOccupancyData([]);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    if (properties.length > 0) {
+      fetchTrendsData();
+    } else {
+      setIsLoading(false);
+    }
+  }, [filterPropertyId, properties]);
+
+  // Calculate stats (with fallbacks for empty data)
+  const currentMonthProfit = monthlyData.length >= 2 ? monthlyData[monthlyData.length - 2].profit : 0;
+  const previousMonthProfit = monthlyData.length >= 3 ? monthlyData[monthlyData.length - 3].profit : 0;
+  const profitChange = previousMonthProfit > 0 
+    ? ((currentMonthProfit - previousMonthProfit) / previousMonthProfit) * 100 
+    : 0;
+
+  const avgMargin = monthlyData.length > 0
+    ? monthlyData.reduce((sum, m) => sum + (m.revenue > 0 ? (m.profit / m.revenue) * 100 : 0), 0) / monthlyData.length
+    : 0;
+
+  const hasData = monthlyData.length > 0 || costBreakdown.length > 0 || occupancyData.length > 0;
 
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-card rounded-xl border border-border p-6">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm text-muted-foreground">Κέρδος Ιανουαρίου</p>
-            {profitChange >= 0 ? (
-              <TrendingUp className="w-4 h-4 text-profit" />
-            ) : (
-              <TrendingDown className="w-4 h-4 text-accent" />
-            )}
-          </div>
-          <p className="font-display font-bold text-3xl text-foreground">€{currentMonthProfit}</p>
-          <p className={`text-sm mt-1 ${profitChange >= 0 ? "text-profit" : "text-accent"}`}>
-            {profitChange >= 0 ? "+" : ""}{profitChange.toFixed(1)}% vs Δεκέμβριο
-          </p>
-        </div>
+      {/* Property Filter */}
+      <PropertyFilter
+        value={filterPropertyId}
+        onChange={setFilterPropertyId}
+      />
 
-        <div className="bg-card rounded-xl border border-border p-6">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm text-muted-foreground">Μέσο Margin</p>
-            <Percent className="w-4 h-4 text-primary" />
-          </div>
-          <p className="font-display font-bold text-3xl text-foreground">{avgMargin.toFixed(1)}%</p>
-          <p className="text-sm text-muted-foreground mt-1">6μηνο μέσος όρος</p>
+      {isLoading ? (
+        <div className="bg-card rounded-xl border border-border p-12 flex items-center justify-center">
+          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
         </div>
-
-        <div className="bg-card rounded-xl border border-border p-6">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm text-muted-foreground">Πληρότητα Ιαν</p>
-            <Calendar className="w-4 h-4 text-primary" />
-          </div>
-          <p className="font-display font-bold text-3xl text-foreground">33%</p>
-          <p className="text-sm text-muted-foreground mt-1">10/31 νύχτες</p>
-        </div>
-
-        <div className="bg-card rounded-xl border border-border p-6">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm text-muted-foreground">Κέρδος/Νύχτα</p>
-            <Euro className="w-4 h-4 text-profit" />
-          </div>
-          <p className="font-display font-bold text-3xl text-profit">€88.3</p>
-          <p className="text-sm text-muted-foreground mt-1">Μέσος Ιανουαρίου</p>
-        </div>
-      </div>
-
-      {/* Charts Grid - Simple Tables instead of Recharts for now */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Revenue & Profit Table */}
-        <div className="bg-card rounded-xl border border-border p-6">
-          <h3 className="font-semibold text-foreground mb-4">Έσοδα vs Κέρδος</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-2 text-muted-foreground">Μήνας</th>
-                  <th className="text-right py-2 text-muted-foreground">Έσοδα</th>
-                  <th className="text-right py-2 text-muted-foreground">Κόστη</th>
-                  <th className="text-right py-2 text-muted-foreground">Κέρδος</th>
-                </tr>
-              </thead>
-              <tbody>
-                {monthlyData.map((row) => (
-                  <tr key={row.month} className="border-b border-border/50">
-                    <td className="py-2 font-medium">{row.month}</td>
-                    <td className="text-right py-2">€{row.revenue}</td>
-                    <td className="text-right py-2 text-muted-foreground">€{row.costs}</td>
-                    <td className="text-right py-2 text-profit font-semibold">€{row.profit}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      ) : !hasData ? (
+        <div className="bg-card rounded-xl border border-border p-12">
+          <div className="text-center">
+            <BarChart3 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="font-semibold text-foreground mb-2">
+              {t.noData || "Δεν υπάρχουν δεδομένα"}
+            </h3>
+            <p className="text-sm text-muted-foreground max-w-md mx-auto">
+              Τα trends θα εμφανιστούν αυτόματα όταν υπάρχουν αρκετές κρατήσεις για ανάλυση.
+              Προσθέστε κρατήσεις για να δείτε στατιστικά και τάσεις.
+            </p>
           </div>
         </div>
+      ) : (
+        <>
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-card rounded-xl border border-border p-6">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm text-muted-foreground">Κέρδος Μήνα</p>
+                {profitChange >= 0 ? (
+                  <TrendingUp className="w-4 h-4 text-profit" />
+                ) : (
+                  <TrendingDown className="w-4 h-4 text-accent" />
+                )}
+              </div>
+              <p className="font-display font-bold text-3xl text-foreground">€{currentMonthProfit}</p>
+              <p className={`text-sm mt-1 ${profitChange >= 0 ? "text-profit" : "text-accent"}`}>
+                {profitChange >= 0 ? "+" : ""}{profitChange.toFixed(1)}% vs προηγ.
+              </p>
+            </div>
 
-        {/* Cost Breakdown */}
-        <div className="bg-card rounded-xl border border-border p-6">
-          <h3 className="font-semibold text-foreground mb-4">Ανάλυση Κόστους (vs προηγ. μήνα)</h3>
-          <div className="space-y-4">
-            {costBreakdown.map((item) => (
-              <div key={item.category} className="flex items-center justify-between">
-                <span className="text-foreground">{item.category}</span>
-                <div className="flex items-center gap-4">
-                  <span className="text-muted-foreground">€{item.previous}</span>
-                  <span className="font-semibold">€{item.current}</span>
-                  <span className={`text-sm ${item.change < 0 ? "text-profit" : item.change > 0 ? "text-accent" : "text-muted-foreground"}`}>
-                    {item.change > 0 ? "+" : ""}{item.change.toFixed(1)}%
-                  </span>
+            <div className="bg-card rounded-xl border border-border p-6">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm text-muted-foreground">Μέσο Margin</p>
+                <Percent className="w-4 h-4 text-primary" />
+              </div>
+              <p className="font-display font-bold text-3xl text-foreground">{avgMargin.toFixed(1)}%</p>
+              <p className="text-sm text-muted-foreground mt-1">Μέσος όρος</p>
+            </div>
+
+            <div className="bg-card rounded-xl border border-border p-6">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm text-muted-foreground">Πληρότητα</p>
+                <Calendar className="w-4 h-4 text-primary" />
+              </div>
+              <p className="font-display font-bold text-3xl text-foreground">
+                {occupancyData.length > 0 ? `${occupancyData[occupancyData.length - 1].rate}%` : "—"}
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">Τρέχων μήνας</p>
+            </div>
+
+            <div className="bg-card rounded-xl border border-border p-6">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm text-muted-foreground">Κέρδος/Νύχτα</p>
+                <Euro className="w-4 h-4 text-profit" />
+              </div>
+              <p className="font-display font-bold text-3xl text-profit">
+                {monthlyData.length > 0 ? `€${(currentMonthProfit / 10).toFixed(1)}` : "—"}
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">Μέσος όρος</p>
+            </div>
+          </div>
+
+          {/* Charts Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Revenue & Profit Table */}
+            {monthlyData.length > 0 && (
+              <div className="bg-card rounded-xl border border-border p-6">
+                <h3 className="font-semibold text-foreground mb-4">Έσοδα vs Κέρδος</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left py-2 text-muted-foreground">Μήνας</th>
+                        <th className="text-right py-2 text-muted-foreground">Έσοδα</th>
+                        <th className="text-right py-2 text-muted-foreground">Κόστη</th>
+                        <th className="text-right py-2 text-muted-foreground">Κέρδος</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {monthlyData.map((row) => (
+                        <tr key={row.month} className="border-b border-border/50">
+                          <td className="py-2 font-medium">{row.month}</td>
+                          <td className="text-right py-2">€{row.revenue}</td>
+                          <td className="text-right py-2 text-muted-foreground">€{row.costs}</td>
+                          <td className="text-right py-2 text-profit font-semibold">€{row.profit}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
-            ))}
+            )}
+
+            {/* Cost Breakdown */}
+            {costBreakdown.length > 0 && (
+              <div className="bg-card rounded-xl border border-border p-6">
+                <h3 className="font-semibold text-foreground mb-4">Ανάλυση Κόστους (vs προηγ. μήνα)</h3>
+                <div className="space-y-4">
+                  {costBreakdown.map((item) => (
+                    <div key={item.category} className="flex items-center justify-between">
+                      <span className="text-foreground">{item.category}</span>
+                      <div className="flex items-center gap-4">
+                        <span className="text-muted-foreground">€{item.previous}</span>
+                        <span className="font-semibold">€{item.current}</span>
+                        <span className={`text-sm ${item.change < 0 ? "text-profit" : item.change > 0 ? "text-accent" : "text-muted-foreground"}`}>
+                          {item.change > 0 ? "+" : ""}{item.change.toFixed(1)}%
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      </div>
 
-      {/* Occupancy */}
-      <div className="bg-card rounded-xl border border-border p-6">
-        <h3 className="font-semibold text-foreground mb-4">Πληρότητα (6μηνο)</h3>
-        <div className="flex items-end justify-between h-[200px] gap-4">
-          {occupancyData.map((item) => (
-            <div key={item.month} className="flex-1 flex flex-col items-center gap-2">
-              <div 
-                className="w-full bg-primary rounded-t"
-                style={{ height: `${item.rate * 1.8}px` }}
-              />
-              <span className="text-xs text-muted-foreground">{item.month}</span>
-              <span className="text-xs font-semibold">{item.rate}%</span>
+          {/* Occupancy */}
+          {occupancyData.length > 0 && (
+            <div className="bg-card rounded-xl border border-border p-6">
+              <h3 className="font-semibold text-foreground mb-4">Πληρότητα</h3>
+              <div className="flex items-end justify-between h-[200px] gap-4">
+                {occupancyData.map((item) => (
+                  <div key={item.month} className="flex-1 flex flex-col items-center gap-2">
+                    <div 
+                      className="w-full bg-primary rounded-t"
+                      style={{ height: `${item.rate * 1.8}px` }}
+                    />
+                    <span className="text-xs text-muted-foreground">{item.month}</span>
+                    <span className="text-xs font-semibold">{item.rate}%</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
+          )}
 
-      {/* Insights */}
-      <div className="bg-primary/5 rounded-xl border border-primary/20 p-6">
-        <div className="flex items-center gap-2 mb-3">
-          <BarChart3 className="w-5 h-5 text-primary" />
-          <h4 className="font-semibold text-foreground">Insights</h4>
-        </div>
-        <ul className="space-y-2 text-sm text-muted-foreground">
-          <li>📉 Η κατανάλωση ρεύματος μειώθηκε 16.7% σε σχέση με τον προηγούμενο μήνα</li>
-          <li>💡 Οι κρατήσεις 1 νύχτας έχουν χαμηλότερο margin λόγω σταθερού κόστους καθαρισμού</li>
-          <li>📈 Ο Δεκέμβριος ήταν ο πιο κερδοφόρος μήνας με €1,170 καθαρό κέρδος</li>
-        </ul>
-      </div>
+          {/* Insights */}
+          <div className="bg-primary/5 rounded-xl border border-primary/20 p-6">
+            <div className="flex items-center gap-2 mb-3">
+              <BarChart3 className="w-5 h-5 text-primary" />
+              <h4 className="font-semibold text-foreground">Insights</h4>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Τα insights θα εμφανιστούν αυτόματα όταν υπάρχουν αρκετά δεδομένα για ανάλυση.
+            </p>
+          </div>
+        </>
+      )}
     </div>
   );
 }

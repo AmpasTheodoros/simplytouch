@@ -1,0 +1,92 @@
+---
+description: Testing patterns with Vitest
+globs: "**/*.test.ts"
+alwaysApply: false
+---
+
+# Testing Patterns
+
+## Test Structure
+
+Place tests in `__tests__` directories near the code they test:
+
+```
+lib/
+  allocation/
+    __tests__/
+      interpolate.test.ts
+      profit.test.ts
+    interpolate.ts
+    profit.ts
+```
+
+## Test File Structure
+
+```typescript
+import { describe, it, expect } from "vitest";
+import { functionToTest } from "../module";
+
+describe("functionToTest", () => {
+  it("should handle basic case", () => {
+    const result = functionToTest(input);
+    expect(result).toBe(expected);
+  });
+
+  it("should handle edge case", () => {
+    const result = functionToTest(edgeInput);
+    expect(result).toEqual(expectedObject);
+  });
+});
+```
+
+## Common Assertions
+
+```typescript
+// Equality
+expect(result).toBe(5);
+expect(result).toEqual({ a: 1, b: 2 });
+
+// Truthiness
+expect(result).toBeTruthy();
+expect(result).toBeFalsy();
+
+// Numbers
+expect(result).toBeGreaterThan(0);
+expect(result).toBeCloseTo(0.3, 5); // For floating point
+
+// Arrays
+expect(array).toHaveLength(3);
+expect(array).toContain(item);
+
+// Errors
+expect(() => fn()).toThrow();
+expect(() => fn()).toThrow("error message");
+```
+
+## Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests once (CI mode)
+npm run test:run
+
+# Run specific test file
+npx vitest run lib/allocation/__tests__/profit.test.ts
+```
+
+## Test Data
+
+Use realistic test data that matches your domain:
+
+```typescript
+const mockBooking = {
+  id: "clxxxxx",
+  propertyId: "clyyyyy",
+  startAt: new Date("2025-01-15"),
+  endAt: new Date("2025-01-19"),
+  nights: 4,
+  payoutCents: 45000, // €450
+};
+```

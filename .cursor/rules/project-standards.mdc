@@ -1,0 +1,170 @@
+---
+description: Core project standards for SimplyTouch vacation rental management app
+alwaysApply: true
+---
+
+# SimplyTouch Project Standards
+
+## Tech Stack
+
+- **Framework**: Next.js 16 with App Router
+- **Auth**: Clerk (`@clerk/nextjs`)
+- **Database**: PostgreSQL with Prisma ORM
+- **Styling**: Tailwind CSS v4 with custom design tokens
+- **UI Components**: Radix UI + shadcn/ui pattern
+- **Validation**: Zod v4
+- **Testing**: Vitest
+- **i18n**: Custom translations in `lib/i18n/translations.ts`
+
+---
+
+## Bilingual Support (REQUIRED)
+
+**All user-facing text MUST support both Greek (el) and English (en).**
+
+### Never hardcode text in components
+
+```tsx
+// ❌ WRONG - hardcoded Greek text
+<h1>Κρατήσεις</h1>
+<Button>Αποθήκευση</Button>
+
+// ✅ CORRECT - use translations
+const { t } = useLanguage();
+<h1>{t.nav.bookings}</h1>
+<Button>{t.save}</Button>
+```
+
+### Adding new text
+
+1. Add translations to BOTH languages in `lib/i18n/translations.ts`:
+
+```typescript
+// lib/i18n/translations.ts
+export const translations = {
+  el: {
+    myFeature: {
+      title: "Τίτλος",
+      description: "Περιγραφή",
+    },
+  },
+  en: {
+    myFeature: {
+      title: "Title",
+      description: "Description",
+    },
+  },
+};
+```
+
+2. Use in components:
+
+```tsx
+const { t } = useLanguage();
+<h1>{t.myFeature.title}</h1>
+```
+
+### Translation structure
+
+- Keep translations organized by feature/page
+- Use nested objects for logical grouping
+- Match the structure exactly between `el` and `en`
+
+---
+
+## Scalability Requirements
+
+**Write code that scales. Always consider growth.**
+
+### Database Design
+
+- Add indexes for frequently queried columns
+- Use pagination for list endpoints (never return unbounded results)
+- Design for multi-tenancy (always filter by `userId` or `propertyId`)
+
+```typescript
+// ✅ Scalable - paginated with index
+const bookings = await db.booking.findMany({
+  where: { propertyId },
+  orderBy: { startAt: "desc" },
+  take: 20,
+  skip: page * 20,
+});
+
+// ❌ Not scalable - returns all records
+const bookings = await db.booking.findMany();
+```
+
+### Component Architecture
+
+- Extract reusable logic into custom hooks
+- Keep components focused (single responsibility)
+- Use composition over prop drilling
+
+```tsx
+// ✅ Scalable - reusable hook
+function useBookings(propertyId: string) {
+  const [bookings, setBookings] = useState([]);
+  // ... fetch logic
+  return { bookings, loading, refetch };
+}
+
+// ✅ Scalable - composable components
+<DataTable columns={columns} data={bookings} />
+```
+
+### API Design
+
+- Use consistent response formats
+- Implement proper error codes
+- Support filtering, sorting, pagination
+
+```typescript
+// ✅ Scalable API response
+return NextResponse.json({
+  data: bookings,
+  meta: { total, page, pageSize },
+});
+```
+
+### State Management
+
+- Colocate state with components that need it
+- Lift state only when necessary
+- Consider server state (React Query pattern) for remote data
+
+---
+
+## Code Conventions
+
+### Money Handling
+
+Always store monetary values as integers in cents:
+
+```typescript
+// ✅ Correct
+payoutCents: 15000      // €150.00
+electricityCostCents: 1234  // €12.34
+
+// ❌ Wrong
+payout: 150.00
+```
+
+### Imports
+
+Use path aliases consistently:
+
+```typescript
+import { db } from "@/lib/db";
+import { Button } from "@/components/ui/button";
+import { requireAuth } from "@/lib/auth";
+```
+
+### File Organization
+
+- Pages: `app/[route]/page.tsx`
+- API routes: `app/api/[resource]/route.ts`
+- Components: `components/[category]/ComponentName.tsx`
+- Validation: `lib/validation/[resource].ts`
+- Database queries: `lib/queries/[feature].ts`
+- Hooks: `hooks/use-[feature].tsx`

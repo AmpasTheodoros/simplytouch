@@ -1,0 +1,102 @@
+---
+description: API route patterns for Next.js App Router
+globs: "**/api/**/route.ts"
+alwaysApply: false
+---
+
+# API Route Patterns
+
+## Standard Structure
+
+```typescript
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/db";
+import { requireAuth, requirePropertyOwnership } from "@/lib/auth";
+import { createSchema, updateSchema } from "@/lib/validation/resource";
+
+// GET - List or fetch resources
+export async function GET(request: NextRequest) {
+  try {
+    const user = await requireAuth();
+    // ... implementation
+    return NextResponse.json(data);
+  } catch (error) {
+    return handleError(error);
+  }
+}
+
+// POST - Create resource
+export async function POST(request: NextRequest) {
+  try {
+    const user = await requireAuth();
+    const body = await request.json();
+    
+    const validated = createSchema.safeParse(body);
+    if (!validated.success) {
+      return NextResponse.json(
+        { error: "Validation error", details: validated.error.flatten() },
+        { status: 400 }
+      );
+    }
+    
+    // ... implementation
+    return NextResponse.json(result, { status: 201 });
+  } catch (error) {
+    return handleError(error);
+  }
+}
+```
+
+## Error Handling
+
+Always handle these error cases:
+
+```typescript
+catch (error) {
+  if (error instanceof Error) {
+    if (error.message === "Unauthorized") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (error.message.startsWith("Forbidden")) {
+      return NextResponse.json({ error: error.message }, { status: 403 });
+    }
+  }
+  console.error("Error description:", error);
+  return NextResponse.json(
+    { error: "Internal server error" },
+    { status: 500 }
+  );
+}
+```
+
+## Dynamic Routes
+
+For routes with params like `[id]`:
+
+```typescript
+// app/api/resource/[id]/route.ts
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  // ...
+}
+```
+
+## Property Ownership
+
+Always verify ownership for property-related resources:
+
+```typescript
+const user = await requireAuth();
+await requirePropertyOwnership(user.id, propertyId);
+```
+
+## Query Parameters
+
+```typescript
+const searchParams = request.nextUrl.searchParams;
+const propertyId = searchParams.get("propertyId");
+const month = searchParams.get("month"); // YYYY-MM format
+```

@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     try {
       const response = await fetch(icalUrl, {
         headers: {
-          "User-Agent": "ProfitBnB/1.0",
+          "User-Agent": "SimplyTouch/1.0",
         },
       });
       

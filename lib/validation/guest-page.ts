@@ -38,6 +38,73 @@ const checkoutTimeBlockSchema = z.object({
   time: z.string(), // HH:mm format
 });
 
+const checkinTimeBlockSchema = z.object({
+  type: z.literal("checkin_time"),
+  time: z.string(), // HH:mm format or range like "15:00 - 20:00"
+});
+
+const hostBlockSchema = z.object({
+  type: z.literal("host"),
+  name: z.string(),
+  description: z.string(),
+  image: z.string().optional(),
+});
+
+const amenitiesBlockSchema = z.object({
+  type: z.literal("amenities"),
+  items: z.array(
+    z.object({
+      icon: z.string(),
+      title: z.string(),
+      description: z.string(),
+    })
+  ),
+});
+
+const includedBlockSchema = z.object({
+  type: z.literal("included"),
+  items: z.array(z.string()),
+});
+
+const importantReminderBlockSchema = z.object({
+  type: z.literal("important_reminder"),
+  message: z.string(),
+});
+
+const locationBlockSchema = z.object({
+  type: z.literal("location"),
+  address: z.string(),
+  city: z.string(),
+  country: z.string(),
+  mapUrl: z.string().optional(),
+  directions: z.object({
+    car: z.string().optional(),
+    bus: z.string().optional(),
+    train: z.string().optional(),
+  }).optional(),
+});
+
+const nearbyBlockSchema = z.object({
+  type: z.literal("nearby"),
+  places: z.array(
+    z.object({
+      name: z.string(),
+      distance: z.string(),
+    })
+  ),
+});
+
+const exploreCategoriesBlockSchema = z.object({
+  type: z.literal("explore_categories"),
+  categories: z.array(
+    z.object({
+      title: z.string(),
+      image: z.string().optional(),
+      icon: z.string().optional(),
+    })
+  ),
+});
+
 export const guestPageBlockSchema = z.discriminatedUnion("type", [
   welcomeBlockSchema,
   wifiBlockSchema,
@@ -45,6 +112,14 @@ export const guestPageBlockSchema = z.discriminatedUnion("type", [
   ecoBlockSchema,
   linksBlockSchema,
   checkoutTimeBlockSchema,
+  checkinTimeBlockSchema,
+  hostBlockSchema,
+  amenitiesBlockSchema,
+  includedBlockSchema,
+  importantReminderBlockSchema,
+  locationBlockSchema,
+  nearbyBlockSchema,
+  exploreCategoriesBlockSchema,
 ]);
 
 export const createGuestPageSchema = z.object({

@@ -21,7 +21,7 @@ export function CTASection() {
           </h2>
 
           <p className="text-lg text-primary-foreground/70 mb-10 max-w-xl mx-auto">
-            Δοκίμασε το ProfitBnB δωρεάν για 14 ημέρες. Δες πώς μοιάζει η
+            Δοκίμασε το SimplyTouch δωρεάν για 14 ημέρες. Δες πώς μοιάζει η
             πραγματική κερδοφορία των ακινήτων σου.
           </p>
 

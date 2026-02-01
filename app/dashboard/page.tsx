@@ -30,7 +30,7 @@ export default async function Dashboard() {
     return (
       <DashboardLayout title="Επισκόπηση" subtitle="Δεν υπάρχουν ακίνητα">
         <div className="text-center py-12">
-          <h2 className="text-xl font-semibold mb-2">Καλώς ήρθατε στο ProfitBnB!</h2>
+          <h2 className="text-xl font-semibold mb-2">Καλώς ήρθατε στο SimplyTouch!</h2>
           <p className="text-muted-foreground mb-4">
             Δημιουργήστε το πρώτο σας ακίνητο για να ξεκινήσετε.
           </p>
@@ -51,9 +51,9 @@ export default async function Dashboard() {
   return (
     <DashboardLayout title="Επισκόπηση" subtitle={monthName}>
       <OverviewView 
-        stats={stats}
-        bookings={bookings}
-        propertyName={property.name}
+        initialStats={stats}
+        initialBookings={bookings}
+        initialPropertyName={property.name}
       />
     </DashboardLayout>
   );

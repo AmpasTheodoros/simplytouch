@@ -57,7 +57,7 @@ export default function About() {
                 </p>
 
                 <p className="text-lg leading-relaxed">
-                  Έτσι δημιουργήσαμε το ProfitBnB. Ένα εργαλείο που κάνει
+                  Έτσι δημιουργήσαμε το SimplyTouch. Ένα εργαλείο που κάνει
                   αυτό που κάναμε χειροκίνητα — αλλά αυτόματα, με ακρίβεια,
                   για κάθε κράτηση.
                 </p>

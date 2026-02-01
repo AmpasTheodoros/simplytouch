@@ -15,16 +15,7 @@ import {
   Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-const sidebarItems = [
-  { icon: LayoutDashboard, label: "Επισκόπηση", path: "/dashboard" },
-  { icon: Calendar, label: "Κρατήσεις", path: "/dashboard/bookings" },
-  { icon: Receipt, label: "Σταθερά Έξοδα", path: "/dashboard/fixed-costs" },
-  { icon: Zap, label: "Καθαρισμοί", path: "/dashboard/cleanings" },
-  { icon: Smartphone, label: "NFC Guest Page", path: "/dashboard/nfc-editor" },
-  { icon: TrendingUp, label: "Τάσεις", path: "/dashboard/trends" },
-  { icon: Settings, label: "Ρυθμίσεις", path: "/dashboard/settings" },
-];
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -36,6 +27,17 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useUser();
+  const { t } = useLanguage();
+
+  const sidebarItems = [
+    { icon: LayoutDashboard, label: t.nav?.overview || "Επισκόπηση", path: "/dashboard" },
+    { icon: Calendar, label: t.nav?.bookings || "Κρατήσεις", path: "/dashboard/bookings" },
+    { icon: Receipt, label: t.nav?.fixedCosts || "Σταθερά Έξοδα", path: "/dashboard/fixed-costs" },
+    { icon: Zap, label: t.nav?.cleanings || "Καθαρισμοί", path: "/dashboard/cleanings" },
+    { icon: Smartphone, label: t.nav?.nfcGuestPage || "NFC Guest Page", path: "/dashboard/nfc-editor" },
+    { icon: TrendingUp, label: t.nav?.trends || "Τάσεις", path: "/dashboard/trends" },
+    { icon: Settings, label: t.nav?.settings || "Ρυθμίσεις", path: "/dashboard/settings" },
+  ];
 
   return (
     <div className="min-h-screen bg-secondary/30 flex">
@@ -49,7 +51,7 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
               </span>
             </div>
             <span className="font-display font-bold text-lg text-sidebar-foreground">
-              ProfitBnB
+              SimplyTouch
             </span>
           </Link>
         </div>
@@ -59,7 +61,7 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
             const isActive = pathname === item.path;
             return (
               <button
-                key={item.label}
+                key={item.path}
                 onClick={() => router.push(item.path)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left ${
                   isActive
@@ -123,9 +125,13 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
               <Bell className="w-5 h-5 text-muted-foreground" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-accent" />
             </button>
-            <Button variant="default" size="sm">
+            <Button 
+              variant="default" 
+              size="sm"
+              onClick={() => router.push("/dashboard/bookings")}
+            >
               <Plus className="w-4 h-4 mr-2" />
-              Νέα Κράτηση
+              {t.bookings?.newBooking || t.dashboard?.newBooking || "Νέα Κράτηση"}
             </Button>
           </div>
         </header>

@@ -36,7 +36,7 @@ export function CostAllocationSection() {
           </h2>
 
           <p className="text-lg text-muted-foreground">
-            Το ProfitBnB κατανέμει αυτόματα τα έξοδα ρεύματος, νερού και σταθερών
+            Το SimplyTouch κατανέμει αυτόματα τα έξοδα ρεύματος, νερού και σταθερών
             σε κάθε booking. Εσύ βλέπεις μόνο το καθαρό κέρδος.
           </p>
         </div>

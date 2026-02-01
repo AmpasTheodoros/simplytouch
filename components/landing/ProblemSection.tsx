@@ -1,70 +1,160 @@
-import { AlertTriangle, Eye, TrendingDown } from "lucide-react";
+"use client";
+
+import { XCircle } from "lucide-react";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export function ProblemSection() {
+  const { t } = useLanguage();
+
+  // Cost breakdown data (for visual demonstration)
+  const revenue = 450;
+  const costs = {
+    electricity: 28,
+    water: 12,
+    cleaning: 65,
+    other: 15,
+  };
+  const totalCosts = Object.values(costs).reduce((a, b) => a + b, 0);
+  const netProfit = revenue - totalCosts;
+  const margin = ((netProfit / revenue) * 100).toFixed(1);
+
+  // Calculate percentages for the progress bar
+  const profitPercent = (netProfit / revenue) * 100;
+  const electricityPercent = (costs.electricity / revenue) * 100;
+  const waterPercent = (costs.water / revenue) * 100;
+  const cleaningPercent = (costs.cleaning / revenue) * 100;
+  const otherPercent = (costs.other / revenue) * 100;
+
   return (
-    <section className="py-20 lg:py-28 bg-background">
+    <section className="py-20 lg:py-28 bg-secondary/30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent mb-6">
-            <AlertTriangle className="w-4 h-4" />
-            <span className="text-sm font-medium">Το πρόβλημα</span>
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          {/* Left Content */}
+          <div>
+            <div className="inline-flex items-center px-4 py-2 rounded-full bg-primary text-primary-foreground mb-6">
+              <span className="text-sm font-medium">{t.problem.badge}</span>
+            </div>
+
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-6">
+              {t.problem.headline}
+            </h2>
+
+            <p className="text-lg text-muted-foreground mb-10 leading-relaxed">
+              {t.problem.description}
+            </p>
+
+            {/* Pain Points */}
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <XCircle className="w-6 h-6 text-destructive flex-shrink-0 mt-0.5" />
+                <span className="text-foreground">{t.problem.point1}</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <XCircle className="w-6 h-6 text-destructive flex-shrink-0 mt-0.5" />
+                <span className="text-foreground">{t.problem.point2}</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <XCircle className="w-6 h-6 text-destructive flex-shrink-0 mt-0.5" />
+                <span className="text-foreground">{t.problem.point3}</span>
+              </div>
+            </div>
           </div>
 
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-            Το Airbnb δείχνει{" "}
-            <span className="text-muted-foreground line-through decoration-accent/50">
-              έσοδα
-            </span>
-            . Όχι κέρδος.
-          </h2>
-
-          <p className="text-lg text-muted-foreground">
-            Βλέπεις €500 από μια κράτηση. Αλλά πόσο έμεινε στην τσέπη σου;
-            Ρεύμα, νερό, καθαρισμός, internet — ποιος τα υπολογίζει;
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8">
-          {/* Problem 1 */}
-          <div className="group p-8 rounded-2xl border border-border bg-card hover:shadow-lg transition-all duration-300">
-            <div className="w-14 h-14 rounded-xl bg-accent/10 flex items-center justify-center mb-6 group-hover:bg-accent/20 transition-colors">
-              <Eye className="w-7 h-7 text-accent" />
-            </div>
-            <h3 className="font-display font-semibold text-xl text-foreground mb-3">
-              Αόρατα κόστη
+          {/* Right Content - Cost Breakdown Card */}
+          <div className="bg-card rounded-2xl p-6 lg:p-8 shadow-lg border border-border">
+            <h3 className="font-display font-semibold text-lg text-foreground mb-6">
+              {t.problem.cardTitle}
             </h3>
-            <p className="text-muted-foreground leading-relaxed">
-              Η κατανάλωση ρεύματος και νερού κρύβεται στους μηνιαίους
-              λογαριασμούς. Δεν ξέρεις πόσο στοίχισε κάθε επισκέπτης.
-            </p>
-          </div>
 
-          {/* Problem 2 */}
-          <div className="group p-8 rounded-2xl border border-border bg-card hover:shadow-lg transition-all duration-300">
-            <div className="w-14 h-14 rounded-xl bg-accent/10 flex items-center justify-center mb-6 group-hover:bg-accent/20 transition-colors">
-              <TrendingDown className="w-7 h-7 text-accent" />
+            {/* Stacked Progress Bar */}
+            <div className="h-4 rounded-full overflow-hidden flex mb-8">
+              <div
+                className="bg-profit"
+                style={{ width: `${profitPercent}%` }}
+              />
+              <div
+                className="bg-amber-500"
+                style={{ width: `${electricityPercent}%` }}
+              />
+              <div
+                className="bg-teal-500"
+                style={{ width: `${waterPercent}%` }}
+              />
+              <div
+                className="bg-slate-500"
+                style={{ width: `${cleaningPercent}%` }}
+              />
+              <div
+                className="bg-slate-300"
+                style={{ width: `${otherPercent}%` }}
+              />
             </div>
-            <h3 className="font-display font-semibold text-xl text-foreground mb-3">
-              Ψευδαισθήσεις εσόδων
-            </h3>
-            <p className="text-muted-foreground leading-relaxed">
-              Μια κράτηση φαίνεται καλή, αλλά μετά τα κόστη μένει ελάχιστο
-              κέρδος. Ή ακόμα χειρότερα — ζημιά.
-            </p>
-          </div>
 
-          {/* Problem 3 */}
-          <div className="group p-8 rounded-2xl border border-border bg-card hover:shadow-lg transition-all duration-300">
-            <div className="w-14 h-14 rounded-xl bg-accent/10 flex items-center justify-center mb-6 group-hover:bg-accent/20 transition-colors">
-              <AlertTriangle className="w-7 h-7 text-accent" />
+            {/* Cost Items */}
+            <div className="space-y-4">
+              {/* Revenue */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-primary" />
+                  <span className="text-muted-foreground">{t.problem.revenue}</span>
+                </div>
+                <span className="font-semibold text-foreground">€{revenue}</span>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-border" />
+
+              {/* Electricity */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-amber-500" />
+                  <span className="text-muted-foreground">{t.problem.electricity}</span>
+                </div>
+                <span className="font-medium text-destructive">-€{costs.electricity}</span>
+              </div>
+
+              {/* Water */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-teal-500" />
+                  <span className="text-muted-foreground">{t.problem.water}</span>
+                </div>
+                <span className="font-medium text-destructive">-€{costs.water}</span>
+              </div>
+
+              {/* Cleaning */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-slate-500" />
+                  <span className="text-muted-foreground">{t.problem.cleaning}</span>
+                </div>
+                <span className="font-medium text-destructive">-€{costs.cleaning}</span>
+              </div>
+
+              {/* Other */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-slate-300" />
+                  <span className="text-muted-foreground">{t.problem.other}</span>
+                </div>
+                <span className="font-medium text-destructive">-€{costs.other}</span>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-border" />
+
+              {/* Net Profit */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-profit" />
+                  <div>
+                    <span className="font-semibold text-foreground">{t.problem.netProfit}</span>
+                    <p className="text-xs text-muted-foreground">{margin}% {t.problem.margin}</p>
+                  </div>
+                </div>
+                <span className="font-bold text-xl text-profit">€{netProfit}</span>
+              </div>
             </div>
-            <h3 className="font-display font-semibold text-xl text-foreground mb-3">
-              Λάθος αποφάσεις τιμολόγησης
-            </h3>
-            <p className="text-muted-foreground leading-relaxed">
-              Χωρίς σωστά δεδομένα, βάζεις λάθος τιμές. Χάνεις χρήματα χωρίς
-              να το ξέρεις.
-            </p>
           </div>
         </div>
       </div>

@@ -1,0 +1,123 @@
+---
+description: React and Next.js component patterns for SimplyTouch
+globs: "**/*.tsx"
+alwaysApply: false
+---
+
+# React Component Patterns
+
+## Bilingual Text (REQUIRED)
+
+**Never hardcode user-facing text. Always use translations.**
+
+```tsx
+"use client";
+import { useLanguage } from "@/components/providers/LanguageProvider";
+
+export function MyComponent() {
+  const { t } = useLanguage();
+  
+  return (
+    <div>
+      <h1>{t.myFeature.title}</h1>
+      <p>{t.myFeature.description}</p>
+      <Button>{t.save}</Button>
+    </div>
+  );
+}
+```
+
+If adding new text, update `lib/i18n/translations.ts` with both Greek and English.
+
+---
+
+## Client vs Server Components
+
+- Default to Server Components (no directive needed)
+- Add `"use client"` only when using hooks, browser APIs, or event handlers
+- Components using `useLanguage()` must be client components
+
+```tsx
+// Client component - needs hooks or translations
+"use client";
+import { useState } from "react";
+import { useLanguage } from "@/components/providers/LanguageProvider";
+
+// Server component - no directive needed
+import { db } from "@/lib/db";
+```
+
+## Component Structure
+
+```tsx
+"use client"; // Only if needed
+
+import { ExternalDeps } from "external";
+import { InternalDeps } from "@/components/...";
+import { useLanguage } from "@/components/providers/LanguageProvider";
+
+interface ComponentProps {
+  // Props interface
+}
+
+export function ComponentName({ prop }: ComponentProps) {
+  const { t } = useLanguage(); // For translations
+  // Other hooks
+  // Then derived state
+  // Then handlers
+  // Return JSX
+}
+```
+
+## UI Components
+
+Use shadcn/ui components from `@/components/ui`:
+
+```tsx
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+```
+
+## Icons
+
+Use Lucide React for icons:
+
+```tsx
+import { ArrowRight, Settings, Calendar } from "lucide-react";
+
+<Button>
+  <ArrowRight className="w-4 h-4 mr-2" />
+  Continue
+</Button>
+```
+
+## Styling
+
+- Use Tailwind CSS classes
+- Use semantic color tokens: `text-foreground`, `bg-card`, `text-muted-foreground`
+- Custom tokens: `text-profit` (green), `bg-sidebar`, `text-sidebar-foreground`
+
+```tsx
+// ✅ Use semantic tokens
+<div className="bg-card text-foreground border-border">
+
+// ❌ Avoid hardcoded colors
+<div className="bg-white text-gray-900">
+```
+
+## Dashboard Pages
+
+Wrap dashboard pages with `DashboardLayout`:
+
+```tsx
+import DashboardLayout from "@/components/dashboard/DashboardLayout";
+
+export default function MyPage() {
+  return (
+    <DashboardLayout title="Page Title" subtitle="Optional subtitle">
+      {/* Page content */}
+    </DashboardLayout>
+  );
+}
+```

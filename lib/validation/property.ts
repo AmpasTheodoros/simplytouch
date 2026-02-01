@@ -3,6 +3,7 @@ import { z } from "zod";
 export const createPropertySchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
   timezone: z.string().default("Europe/Athens"),
+  pricePerWh: z.number().int().min(0).optional(), // cents per 100 Wh
   icalUrl: z.string().url().optional().nullable(),
 });
 

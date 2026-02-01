@@ -11,7 +11,7 @@ export function Footer() {
               <div className="w-8 h-8 rounded-lg bg-primary-foreground flex items-center justify-center">
                 <span className="text-primary font-bold text-lg">P</span>
               </div>
-              <span className="font-display font-bold text-xl">ProfitBnB</span>
+              <span className="font-display font-bold text-xl">SimplyTouch</span>
             </Link>
             <p className="text-primary-foreground/70 text-sm leading-relaxed">
               Η πλατφόρμα που δείχνει το πραγματικό κέρδος ανά κράτηση. Όχι έσοδα.
@@ -79,7 +79,7 @@ export function Footer() {
 
         <div className="mt-12 pt-8 border-t border-primary-foreground/10">
           <p className="text-sm text-primary-foreground/50 text-center">
-            © {new Date().getFullYear()} ProfitBnB. Όλα τα δικαιώματα διατηρούνται.
+            © {new Date().getFullYear()} SimplyTouch. Όλα τα δικαιώματα διατηρούνται.
           </p>
         </div>
       </div>
