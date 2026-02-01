@@ -41,7 +41,7 @@ export async function allocateMonthlyFixedCosts(
 
   // Calculate monthly total
   // MONTHLY expenses count as-is, YEARLY expenses are divided by 12
-  const totalCents = expenses.reduce((sum, expense) => {
+  const totalCents = expenses.reduce((sum: number, expense) => {
     if (expense.frequency === "MONTHLY") {
       return sum + expense.amountCents;
     } else {
