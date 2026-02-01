@@ -1,7 +1,6 @@
 import { db } from "@/lib/db";
 import { computeBookingEnergy } from "./interpolate";
 import { calculateEnergyCostCents } from "@/lib/constants";
-import type { Expense } from "@prisma/client";
 
 export interface MonthlyFixedCostsResult {
   totalCents: number;
@@ -42,7 +41,7 @@ export async function allocateMonthlyFixedCosts(
 
   // Calculate monthly total
   // MONTHLY expenses count as-is, YEARLY expenses are divided by 12
-  const totalCents = expenses.reduce((sum: number, expense: Expense) => {
+  const totalCents = expenses.reduce<number>((sum, expense) => {
     if (expense.frequency === "MONTHLY") {
       return sum + expense.amountCents;
     } else {
