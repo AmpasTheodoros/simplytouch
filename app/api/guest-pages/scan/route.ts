@@ -2,36 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { scanEventSchema } from "@/lib/validation/guest-page";
 import { createHash } from "crypto";
-
-// Simple in-memory rate limiting
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
-const RATE_LIMIT_MAX = 10; // 10 requests per minute
-
-function getRateLimitKey(request: NextRequest): string {
-  // Get IP from various headers
-  const forwarded = request.headers.get("x-forwarded-for");
-  const realIp = request.headers.get("x-real-ip");
-  const ip = forwarded?.split(",")[0]?.trim() || realIp || "unknown";
-  return ip;
-}
-
-function checkRateLimit(key: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(key);
-
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return true;
-  }
-
-  if (entry.count >= RATE_LIMIT_MAX) {
-    return false;
-  }
-
-  entry.count++;
-  return true;
-}
+import { rateLimiter } from "@/lib/rate-limit";
 
 function hashIp(ip: string): string {
   return createHash("sha256").update(ip).digest("hex").slice(0, 16);
@@ -41,8 +12,9 @@ function hashIp(ip: string): string {
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting
-    const rateLimitKey = getRateLimitKey(request);
-    if (!checkRateLimit(rateLimitKey)) {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0] || "anonymous";
+    const { success } = await rateLimiter.limit(ip);
+    if (!success) {
       return NextResponse.json(
         { error: "Too many requests" },
         { status: 429 }
@@ -80,7 +52,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Hash IP for privacy
-    const ipHash = hashIp(rateLimitKey);
+    const ipHash = hashIp(ip);
 
     // Create scan event
     await db.scanEvent.create({

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth, requirePropertyOwnership } from "@/lib/auth";
 import { createExpenseSchema } from "@/lib/validation/expense";
+import { parsePagination, paginatedResponse } from "@/lib/pagination";
 
 // GET /api/expenses - List expenses for a property
 export async function GET(request: NextRequest) {
@@ -19,16 +20,25 @@ export async function GET(request: NextRequest) {
 
     await requirePropertyOwnership(user.id, propertyId);
 
-    const expenses = await db.expense.findMany({
-      where: { propertyId },
-      orderBy: [
-        { active: "desc" },
-        { category: "asc" },
-        { name: "asc" },
-      ],
-    });
+    const { page, pageSize, skip, take } = parsePagination(searchParams, 50);
 
-    return NextResponse.json(expenses);
+    const where = { propertyId };
+
+    const [expenses, total] = await Promise.all([
+      db.expense.findMany({
+        where,
+        orderBy: [
+          { active: "desc" },
+          { category: "asc" },
+          { name: "asc" },
+        ],
+        skip,
+        take,
+      }),
+      db.expense.count({ where }),
+    ]);
+
+    return NextResponse.json(paginatedResponse(expenses, total, page, pageSize));
   } catch (error) {
     if (error instanceof Error) {
       if (error.message === "Unauthorized") {

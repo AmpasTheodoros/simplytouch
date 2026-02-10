@@ -121,7 +121,7 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
           </div>
 
           <div className="flex items-center gap-4">
-            <button className="relative p-2 rounded-lg hover:bg-secondary transition-colors">
+            <button className="relative p-2 rounded-lg hover:bg-secondary transition-colors" aria-label="Notifications">
               <Bell className="w-5 h-5 text-muted-foreground" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-accent" />
             </button>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth, requirePropertyOwnership } from "@/lib/auth";
 import { createCleaningEventSchema } from "@/lib/validation/cleaning";
+import { parsePagination, paginatedResponse } from "@/lib/pagination";
 
 // GET /api/cleaning-events - List cleaning events for a property
 export async function GET(request: NextRequest) {
@@ -32,25 +33,34 @@ export async function GET(request: NextRequest) {
       };
     }
 
-    const cleaningEvents = await db.cleaningEvent.findMany({
-      where: {
-        propertyId,
-        ...dateFilter,
-      },
-      orderBy: { scheduledAt: "desc" },
-      include: {
-        booking: {
-          select: {
-            id: true,
-            guestName: true,
-            startAt: true,
-            endAt: true,
+    const { page, pageSize, skip, take } = parsePagination(searchParams);
+
+    const where = {
+      propertyId,
+      ...dateFilter,
+    };
+
+    const [cleaningEvents, total] = await Promise.all([
+      db.cleaningEvent.findMany({
+        where,
+        orderBy: { scheduledAt: "desc" },
+        include: {
+          booking: {
+            select: {
+              id: true,
+              guestName: true,
+              startAt: true,
+              endAt: true,
+            },
           },
         },
-      },
-    });
+        skip,
+        take,
+      }),
+      db.cleaningEvent.count({ where }),
+    ]);
 
-    return NextResponse.json(cleaningEvents);
+    return NextResponse.json(paginatedResponse(cleaningEvents, total, page, pageSize));
   } catch (error) {
     if (error instanceof Error) {
       if (error.message === "Unauthorized") {

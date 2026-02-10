@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/components/providers/LanguageProvider";
+import { toast } from "sonner";
 
 type Property = {
   id: string;
@@ -34,10 +35,10 @@ export default function PropertiesSettingsPage() {
 
   const fetchProperties = async () => {
     try {
-      const response = await fetch("/api/properties");
+      const response = await fetch("/api/properties?pageSize=100");
       if (response.ok) {
-        const data = await response.json();
-        setProperties(data);
+        const json = await response.json();
+        setProperties(json.data || json);
       }
     } catch (error) {
       console.error("Error fetching properties:", error);
@@ -58,11 +59,11 @@ export default function PropertiesSettingsPage() {
         setProperties(properties.filter((p) => p.id !== propertyId));
       } else {
         const error = await response.json();
-        alert(error.error || "Failed to delete property");
+        toast.error(error.error || "Failed to delete property");
       }
     } catch (error) {
       console.error("Error deleting property:", error);
-      alert("An error occurred while deleting the property");
+      toast.error("An error occurred while deleting the property");
     } finally {
       setDeleting(null);
     }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth, requirePropertyOwnership } from "@/lib/auth";
 import { createReadingSchema, createReadingBatchSchema } from "@/lib/validation/reading";
+import { parsePagination, paginatedResponse } from "@/lib/pagination";
 
 // GET /api/readings - List meter readings for a property
 export async function GET(request: NextRequest) {
@@ -33,16 +34,24 @@ export async function GET(request: NextRequest) {
       };
     }
 
-    const readings = await db.meterReading.findMany({
-      where: {
-        propertyId,
-        ...dateFilter,
-      },
-      orderBy: { recordedAt: "desc" },
-      take: limit ? parseInt(limit) : undefined,
-    });
+    const { page, pageSize, skip, take } = parsePagination(searchParams, 50);
 
-    return NextResponse.json(readings);
+    const where = {
+      propertyId,
+      ...dateFilter,
+    };
+
+    const [readings, total] = await Promise.all([
+      db.meterReading.findMany({
+        where,
+        orderBy: { recordedAt: "desc" },
+        skip,
+        take,
+      }),
+      db.meterReading.count({ where }),
+    ]);
+
+    return NextResponse.json(paginatedResponse(readings, total, page, pageSize));
   } catch (error) {
     if (error instanceof Error) {
       if (error.message === "Unauthorized") {

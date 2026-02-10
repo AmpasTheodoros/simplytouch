@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { requireAuth, requirePropertyOwnership } from "@/lib/auth";
 import { createGuestPageSchema } from "@/lib/validation/guest-page";
 import { nanoid } from "nanoid";
+import { parsePagination, paginatedResponse } from "@/lib/pagination";
 
 // GET /api/guest-pages - List guest pages for a property
 export async function GET(request: NextRequest) {
@@ -20,12 +21,21 @@ export async function GET(request: NextRequest) {
 
     await requirePropertyOwnership(user.id, propertyId);
 
-    const guestPages = await db.guestPage.findMany({
-      where: { propertyId },
-      orderBy: { createdAt: "desc" },
-    });
+    const { page, pageSize, skip, take } = parsePagination(searchParams);
 
-    return NextResponse.json(guestPages);
+    const where = { propertyId };
+
+    const [guestPages, total] = await Promise.all([
+      db.guestPage.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take,
+      }),
+      db.guestPage.count({ where }),
+    ]);
+
+    return NextResponse.json(paginatedResponse(guestPages, total, page, pageSize));
   } catch (error) {
     if (error instanceof Error) {
       if (error.message === "Unauthorized") {

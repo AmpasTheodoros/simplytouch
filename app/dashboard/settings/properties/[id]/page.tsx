@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/components/providers/LanguageProvider";
+import { toast } from "sonner";
 
 type Property = {
   id: string;
@@ -82,11 +83,11 @@ export default function EditPropertyPage() {
         router.push("/dashboard/settings/properties");
       } else {
         const error = await response.json();
-        alert(error.error || "Failed to update property");
+        toast.error(error.error || "Failed to update property");
       }
     } catch (error) {
       console.error("Error updating property:", error);
-      alert("An error occurred while updating the property");
+      toast.error("An error occurred while updating the property");
     } finally {
       setIsSubmitting(false);
     }
@@ -105,11 +106,11 @@ export default function EditPropertyPage() {
         router.push("/dashboard/settings/properties");
       } else {
         const error = await response.json();
-        alert(error.error || "Failed to delete property");
+        toast.error(error.error || "Failed to delete property");
       }
     } catch (error) {
       console.error("Error deleting property:", error);
-      alert("An error occurred while deleting the property");
+      toast.error("An error occurred while deleting the property");
     } finally {
       setIsDeleting(false);
     }

@@ -207,9 +207,10 @@ export default function NFCEditorView() {
 
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/guest-pages?propertyId=${propertyId}`);
+      const res = await fetch(`/api/guest-pages?propertyId=${propertyId}&pageSize=100`);
       if (res.ok) {
-        const pages: GuestPageData[] = await res.json();
+        const json = await res.json();
+        const pages: GuestPageData[] = json.data || json;
         if (pages.length > 0) {
           const page = pages[0];
           setGuestPage(page);
@@ -514,7 +515,7 @@ export default function NFCEditorView() {
                         onChange={(e) =>
                           updateNearbyPlace(index, "name", e.target.value)
                         }
-                        placeholder="Παραλία"
+                        placeholder={t.nfcEditor.placeholders.beach}
                         className="flex-1"
                       />
                       <Input
@@ -522,7 +523,7 @@ export default function NFCEditorView() {
                         onChange={(e) =>
                           updateNearbyPlace(index, "distance", e.target.value)
                         }
-                        placeholder="5 λεπτά"
+                        placeholder={t.nfcEditor.placeholders.distance}
                         className="w-28"
                       />
                       <Button

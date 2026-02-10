@@ -36,8 +36,8 @@ export default function PropertyFilter({
       try {
         const res = await fetch("/api/properties");
         if (res.ok) {
-          const data = await res.json();
-          const props = Array.isArray(data) ? data : (data.properties || []);
+          const json = await res.json();
+          const props = Array.isArray(json) ? json : (json.data || json.properties || []);
           setProperties(props.map((p: { id: string; name: string; address?: string | null }) => ({
             id: p.id,
             name: p.name,

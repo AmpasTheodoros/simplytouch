@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Zap,
   Droplets,
@@ -7,57 +9,59 @@ import {
   Bell,
   Target,
 } from "lucide-react";
-
-const features = [
-  {
-    icon: Zap,
-    title: "Ρεύμα ανά νύχτα",
-    description: "Αυτόματη κατανομή κατανάλωσης στις ημέρες διαμονής.",
-  },
-  {
-    icon: Droplets,
-    title: "Κόστος νερού",
-    description: "Μετρήσεις m³ και υπολογισμός ανά περίοδο κράτησης.",
-  },
-  {
-    icon: SparklesIcon,
-    title: "Καθαρισμός",
-    description: "Turnover events χρεωμένα απευθείας στην κράτηση.",
-  },
-  {
-    icon: Wifi,
-    title: "Σταθερά μηνιαία",
-    description: "Internet, συνδρομές μοιρασμένα στις κατειλημμένες νύχτες.",
-  },
-  {
-    icon: TrendingUp,
-    title: "Τάσεις κερδοφορίας",
-    description: "Μηνιαία εξέλιξη margin και κέρδους ανά ακίνητο.",
-  },
-  {
-    icon: Bell,
-    title: "Alerts χαμηλού margin",
-    description: "Ειδοποίηση για κρατήσεις με αρνητικό ή χαμηλό κέρδος.",
-  },
-];
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export function EveryFeatureSection() {
+  const { t } = useLanguage();
+
+  const features = [
+    {
+      icon: Zap,
+      title: t.features.electricityTitle,
+      description: t.features.electricityDesc,
+    },
+    {
+      icon: Droplets,
+      title: t.features.waterTitle,
+      description: t.features.waterDesc,
+    },
+    {
+      icon: SparklesIcon,
+      title: t.features.cleaningTitle,
+      description: t.features.cleaningDesc,
+    },
+    {
+      icon: Wifi,
+      title: t.features.fixedMonthlyTitle,
+      description: t.features.fixedMonthlyDesc,
+    },
+    {
+      icon: TrendingUp,
+      title: t.features.profitTrendsTitle,
+      description: t.features.profitTrendsDesc,
+    },
+    {
+      icon: Bell,
+      title: t.features.lowMarginAlertsTitle,
+      description: t.features.lowMarginAlertsDesc,
+    },
+  ];
+
   return (
     <section className="py-20 lg:py-28 bg-secondary/30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-6">
             <Target className="w-4 h-4" />
-            <span className="text-sm font-medium">Πλήρης κάλυψη</span>
+            <span className="text-sm font-medium">{t.features.badge}</span>
           </div>
 
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-            Κάθε κόστος, αυτόματα παρακολουθούμενο
+            {t.features.headline}
           </h2>
 
           <p className="text-lg text-muted-foreground">
-            Τα πάντα υπολογίζονται αυτόματα σε κάθε booking — εσύ βλέπεις μόνο το
-            τελικό αποτέλεσμα.
+            {t.features.subheadline}
           </p>
         </div>
 

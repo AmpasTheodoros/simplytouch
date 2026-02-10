@@ -1,24 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Wifi, Tv, Shield, Droplets, Flame, Phone, Package, Wrench, Loader2 } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
 import PropertyFilter, { ALL_PROPERTIES } from "@/components/dashboard/PropertyFilter";
 import { useProperty } from "@/components/providers/PropertyProvider";
 import { useLanguage } from "@/components/providers/LanguageProvider";
-import { EXPENSE_CATEGORIES } from "@/lib/constants";
+import { toast } from "sonner";
+import { createExpenseSchema } from "@/lib/validation/expense";
+import ExpenseFormDialog from "@/components/dashboard/fixed-costs/ExpenseFormDialog";
+import ExpenseCategoryGroup from "@/components/dashboard/fixed-costs/ExpenseCategoryGroup";
 
 interface Expense {
   id: string;
@@ -36,27 +27,6 @@ interface NewExpenseForm {
   frequency: "MONTHLY" | "YEARLY";
   category: string;
   active: boolean;
-}
-
-// Icon mapping for categories
-const categoryIcons: Record<string, typeof Wifi> = {
-  utilities: Droplets,
-  subscriptions: Tv,
-  insurance: Shield,
-  maintenance: Wrench,
-  other: Package,
-};
-
-// Get icon based on expense name or category
-function getExpenseIcon(name: string, category: string) {
-  const nameLower = name.toLowerCase();
-  if (nameLower.includes("internet") || nameLower.includes("wifi")) return Wifi;
-  if (nameLower.includes("netflix") || nameLower.includes("tv") || nameLower.includes("streaming")) return Tv;
-  if (nameLower.includes("ασφάλεια") || nameLower.includes("insurance")) return Shield;
-  if (nameLower.includes("αέριο") || nameLower.includes("gas") || nameLower.includes("θέρμανση")) return Flame;
-  if (nameLower.includes("τηλέφωνο") || nameLower.includes("phone")) return Phone;
-  if (nameLower.includes("νερό") || nameLower.includes("water") || nameLower.includes("κοινόχρηστα")) return Droplets;
-  return categoryIcons[category] || Package;
 }
 
 export default function FixedCostsView() {
@@ -94,10 +64,10 @@ export default function FixedCostsView() {
         try {
           const allExpenses: Expense[] = [];
           for (const prop of properties) {
-            const res = await fetch(`/api/expenses?propertyId=${prop.id}`);
+            const res = await fetch(`/api/expenses?propertyId=${prop.id}&pageSize=100`);
             if (res.ok) {
-              const data = await res.json();
-              allExpenses.push(...data);
+              const json = await res.json();
+              allExpenses.push(...(json.data || json));
             }
           }
           setCosts(allExpenses);
@@ -113,10 +83,10 @@ export default function FixedCostsView() {
 
       setIsLoading(true);
       try {
-        const res = await fetch(`/api/expenses?propertyId=${filterPropertyId}`);
+        const res = await fetch(`/api/expenses?propertyId=${filterPropertyId}&pageSize=100`);
         if (res.ok) {
-          const data = await res.json();
-          setCosts(data);
+          const json = await res.json();
+          setCosts(json.data || json);
           setError(null);
         } else {
           setError("Failed to load expenses");
@@ -155,7 +125,23 @@ export default function FixedCostsView() {
   // Handle create expense
   const handleCreateExpense = async () => {
     if (!filterPropertyId || filterPropertyId === ALL_PROPERTIES) {
-      alert("Please select a property first");
+      toast.error("Please select a property first");
+      return;
+    }
+
+    const payload = {
+      propertyId: filterPropertyId,
+      name: newExpense.name,
+      amountCents: Math.round(parseFloat(newExpense.amountCents || "0") * 100),
+      frequency: newExpense.frequency,
+      category: newExpense.category,
+      active: newExpense.active,
+    };
+
+    const validation = createExpenseSchema.safeParse(payload);
+    if (!validation.success) {
+      const firstError = validation.error.issues[0]?.message || "Validation error";
+      toast.error(firstError);
       return;
     }
 
@@ -164,14 +150,7 @@ export default function FixedCostsView() {
       const res = await fetch("/api/expenses", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          propertyId: filterPropertyId,
-          name: newExpense.name,
-          amountCents: Math.round(parseFloat(newExpense.amountCents || "0") * 100),
-          frequency: newExpense.frequency,
-          category: newExpense.category,
-          active: newExpense.active,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
@@ -188,11 +167,11 @@ export default function FixedCostsView() {
         });
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to create expense");
+        toast.error(err.error || "Failed to create expense");
       }
     } catch (err) {
       console.error("Error creating expense:", err);
-      alert("Failed to create expense");
+      toast.error("Failed to create expense");
     } finally {
       setIsSubmitting(false);
     }
@@ -276,7 +255,7 @@ export default function FixedCostsView() {
       {/* Loading/Error/Empty States */}
       {isLoading ? (
         <div className="bg-card rounded-xl border border-border p-8 flex items-center justify-center">
-          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" role="status" />
         </div>
       ) : error ? (
         <div className="bg-card rounded-xl border border-border p-8 text-center text-muted-foreground">
@@ -288,54 +267,10 @@ export default function FixedCostsView() {
         </div>
       ) : (
         /* Costs by Category */
-        Object.entries(groupedCosts).map(([category, categoryCosts]) => (
-          <div key={category} className="bg-card rounded-xl border border-border overflow-hidden">
-            <div className="p-4 border-b border-border bg-secondary/30">
-              <h3 className="font-semibold text-foreground">
-                {t.expenses?.categories?.[category as keyof typeof t.expenses.categories] || category}
-              </h3>
-            </div>
-            <div className="divide-y divide-border">
-              {categoryCosts.map((cost) => {
-                const Icon = getExpenseIcon(cost.name, cost.category);
-                return (
-                  <div
-                    key={cost.id}
-                    className={`p-4 flex items-center justify-between ${!cost.active ? "opacity-50" : ""}`}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <Icon className="w-5 h-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-foreground">{cost.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {t.expenses?.frequencies?.[cost.frequency] || cost.frequency}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <p className="font-semibold text-foreground">
-                        €{(cost.amountCents / 100).toFixed(2)}
-                      </p>
-                      <div className="flex items-center gap-1">
-                        <button className="p-2 rounded-lg hover:bg-secondary transition-colors">
-                          <Edit className="w-4 h-4 text-muted-foreground" />
-                        </button>
-                        <button 
-                          className="p-2 rounded-lg hover:bg-secondary transition-colors"
-                          onClick={() => handleDeleteExpense(cost.id)}
-                        >
-                          <Trash2 className="w-4 h-4 text-muted-foreground" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ))
+        <ExpenseCategoryGroup
+          groupedCosts={groupedCosts}
+          onDeleteExpense={handleDeleteExpense}
+        />
       )}
 
       {/* Info Box */}
@@ -344,160 +279,23 @@ export default function FixedCostsView() {
           💡 {t.expenses?.howCalculated || "Πώς υπολογίζονται;"}
         </h4>
         <p className="text-sm text-muted-foreground">
-          {t.expenses?.calculationExplanation || 
-            "Τα σταθερά έξοδα κατανέμονται αναλογικά στις κρατήσεις βάσει των νυχτών διαμονής."}{" "}
-          {t.expenses?.costPerNight ? "" : `Για παράδειγμα, αν έχεις 20 νύχτες κρατήσεις τον μήνα, κάθε νύχτα επιβαρύνεται με €${(totalMonthly / 100 / 20).toFixed(2)}.`}
+          {t.expenses.calculationExplanation}{" "}
+          {t.expenses.allocationExample}
         </p>
       </div>
 
       {/* New Expense Dialog */}
-      <Dialog open={showNewExpenseDialog} onOpenChange={handleDialogClose}>
-        <DialogContent className="max-w-md">
-          <DialogClose onClose={handleDialogClose} />
-          <DialogHeader>
-            <DialogTitle>
-              {showPreview 
-                ? (t.expenses?.previewTitle || "Προεπισκόπηση Εξόδου")
-                : (t.expenses?.addExpense || "Προσθήκη Εξόδου")}
-            </DialogTitle>
-            <DialogDescription>
-              {showPreview 
-                ? (t.confirm || "Επιβεβαιώστε τα στοιχεία του εξόδου")
-                : "Συμπληρώστε τα στοιχεία του εξόδου"}
-            </DialogDescription>
-          </DialogHeader>
-
-          {!showPreview ? (
-            // Form View
-            <div className="p-6 space-y-4">
-              <div className="space-y-2">
-                <Label>{t.expenses?.name || "Όνομα"} *</Label>
-                <Input
-                  value={newExpense.name}
-                  onChange={(e) => handleFormChange("name", e.target.value)}
-                  placeholder={t.expenses?.namePlaceholder || "π.χ. Internet"}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>{t.expenses?.amount || "Ποσό"} (€) *</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={newExpense.amountCents}
-                    onChange={(e) => handleFormChange("amountCents", e.target.value)}
-                    placeholder={t.expenses?.amountPlaceholder || "π.χ. 35"}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t.expenses?.frequency || "Συχνότητα"}</Label>
-                  <Select
-                    value={newExpense.frequency}
-                    onChange={(e) => handleFormChange("frequency", e.target.value)}
-                  >
-                    <option value="MONTHLY">
-                      {t.expenses?.frequencies?.MONTHLY || "Μηνιαία"}
-                    </option>
-                    <option value="YEARLY">
-                      {t.expenses?.frequencies?.YEARLY || "Ετήσια"}
-                    </option>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>{t.expenses?.category || "Κατηγορία"}</Label>
-                <Select
-                  value={newExpense.category}
-                  onChange={(e) => handleFormChange("category", e.target.value)}
-                >
-                  {EXPENSE_CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {t.expenses?.categories?.[cat as keyof typeof t.expenses.categories] || cat}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="active"
-                  checked={newExpense.active}
-                  onChange={(e) => handleFormChange("active", e.target.checked)}
-                  className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
-                />
-                <Label htmlFor="active" className="cursor-pointer">
-                  {t.expenses?.active || "Ενεργό"}
-                </Label>
-              </div>
-            </div>
-          ) : (
-            // Preview View
-            <div className="p-6 space-y-4">
-              <div className="bg-secondary/50 rounded-lg p-4 space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">{t.expenses?.name || "Όνομα"}:</span>
-                  <span className="font-medium">{newExpense.name || "—"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">{t.expenses?.amount || "Ποσό"}:</span>
-                  <span className="font-medium">€{newExpense.amountCents || "0"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">{t.expenses?.frequency || "Συχνότητα"}:</span>
-                  <span className="font-medium">
-                    {t.expenses?.frequencies?.[newExpense.frequency] || newExpense.frequency}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">{t.expenses?.category || "Κατηγορία"}:</span>
-                  <span className="font-medium">
-                    {t.expenses?.categories?.[newExpense.category as keyof typeof t.expenses.categories] || newExpense.category}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">{t.expenses?.active || "Ενεργό"}:</span>
-                  <span className="font-medium">{newExpense.active ? "✓" : "✗"}</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <DialogFooter>
-            {!showPreview ? (
-              <>
-                <Button variant="outline" onClick={handleDialogClose}>
-                  {t.cancel || "Ακύρωση"}
-                </Button>
-                <Button 
-                  onClick={() => setShowPreview(true)} 
-                  disabled={!canSubmit}
-                >
-                  {t.preview || "Προεπισκόπηση"}
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button variant="outline" onClick={() => setShowPreview(false)}>
-                  {t.back || "Πίσω"}
-                </Button>
-                <Button 
-                  onClick={handleCreateExpense} 
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : null}
-                  {t.expenses?.confirmCreate || "Δημιουργία Εξόδου"}
-                </Button>
-              </>
-            )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ExpenseFormDialog
+        open={showNewExpenseDialog}
+        showPreview={showPreview}
+        isSubmitting={isSubmitting}
+        newExpense={newExpense}
+        canSubmit={!!canSubmit}
+        onFormChange={handleFormChange}
+        onDialogClose={handleDialogClose}
+        onShowPreview={setShowPreview}
+        onCreateExpense={handleCreateExpense}
+      />
     </div>
   );
 }

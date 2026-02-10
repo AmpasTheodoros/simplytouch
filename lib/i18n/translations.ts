@@ -1,5 +1,65 @@
 export const translations = {
   el: {
+    // Error boundaries
+    error: {
+      title: "Κάτι πήγε στραβά",
+      description: "Παρουσιάστηκε ένα απρόσμενο σφάλμα. Παρακαλώ δοκιμάστε ξανά.",
+      retry: "Δοκιμάστε ξανά",
+      backToDashboard: "Πίσω στο Dashboard",
+    },
+
+    // Header / Public Navigation
+    header: {
+      howItWorks: "Πώς Λειτουργεί",
+      features: "Χαρακτηριστικά",
+      nfc: "NFC Guest Page",
+      pricing: "Τιμολόγηση",
+      about: "Σχετικά",
+      signIn: "Σύνδεση",
+      tryFree: "Δοκίμασε Δωρεάν",
+    },
+
+    // Features Section (landing page)
+    features: {
+      badge: "Πλήρης κάλυψη",
+      headline: "Κάθε κόστος, αυτόματα παρακολουθούμενο",
+      subheadline: "Τα πάντα υπολογίζονται αυτόματα σε κάθε booking — εσύ βλέπεις μόνο το τελικό αποτέλεσμα.",
+      electricityTitle: "Ρεύμα ανά νύχτα",
+      electricityDesc: "Αυτόματη κατανομή κατανάλωσης στις ημέρες διαμονής.",
+      waterTitle: "Κόστος νερού",
+      waterDesc: "Μετρήσεις m³ και υπολογισμός ανά περίοδο κράτησης.",
+      cleaningTitle: "Καθαρισμός",
+      cleaningDesc: "Turnover events χρεωμένα απευθείας στην κράτηση.",
+      fixedMonthlyTitle: "Σταθερά μηνιαία",
+      fixedMonthlyDesc: "Internet, συνδρομές μοιρασμένα στις κατειλημμένες νύχτες.",
+      profitTrendsTitle: "Τάσεις κερδοφορίας",
+      profitTrendsDesc: "Μηνιαία εξέλιξη margin και κέρδους ανά ακίνητο.",
+      lowMarginAlertsTitle: "Alerts χαμηλού margin",
+      lowMarginAlertsDesc: "Ειδοποίηση για κρατήσεις με αρνητικό ή χαμηλό κέρδος.",
+    },
+
+    // Trends page
+    trends: {
+      title: "Τάσεις",
+      subtitle: "Ανάλυση κερδοφορίας",
+      emptyDescription: "Τα trends θα εμφανιστούν αυτόματα όταν υπάρχουν αρκετές κρατήσεις για ανάλυση. Προσθέστε κρατήσεις για να δείτε στατιστικά και τάσεις.",
+      monthProfit: "Κέρδος Μήνα",
+      vsPrevious: "vs προηγ.",
+      avgMargin: "Μέσο Margin",
+      average: "Μέσος όρος",
+      occupancy: "Πληρότητα",
+      currentMonth: "Τρέχων μήνας",
+      profitPerNight: "Κέρδος/Νύχτα",
+      revenueVsProfit: "Έσοδα vs Κέρδος",
+      month: "Μήνας",
+      revenue: "Έσοδα",
+      costs: "Κόστη",
+      profit: "Κέρδος",
+      costAnalysisVsPrev: "Ανάλυση Κόστους (vs προηγ. μήνα)",
+      insights: "Insights",
+      insightsDescription: "Τα insights θα εμφανιστούν αυτόματα όταν υπάρχουν αρκετά δεδομένα για ανάλυση.",
+    },
+
     // Landing Page - Problem Section
     problem: {
       badge: "Το Πρόβλημα",
@@ -48,11 +108,17 @@ export const translations = {
     dashboard: {
       title: "Dashboard",
       newBooking: "Νέα Κράτηση",
+      welcome: "Καλώς ήρθατε στο SimplyTouch!",
+      welcomeDesc: "Δημιουργήστε το πρώτο σας ακίνητο για να ξεκινήσετε.",
+      addPropertyCta: "Προσθήκη Ακινήτου",
+      noProperties: "Δεν υπάρχουν ακίνητα",
+      monthNames: ["Ιανουάριος", "Φεβρουάριος", "Μάρτιος", "Απρίλιος", "Μάιος", "Ιούνιος", "Ιούλιος", "Αύγουστος", "Σεπτέμβριος", "Οκτώβριος", "Νοέμβριος", "Δεκέμβριος"],
     },
     
     // Bookings
     bookings: {
       title: "Κρατήσεις",
+      subtitle: "Διαχείριση κρατήσεων",
       newBooking: "Νέα Κράτηση",
       searchGuest: "Αναζήτηση επισκέπτη...",
       filters: "Φίλτρα",
@@ -97,7 +163,9 @@ export const translations = {
     // Cleanings
     cleanings: {
       title: "Καθαρισμοί",
+      subtitle: "Turnover events & ομάδα καθαρισμού",
       newCleaning: "Νέος Καθαρισμός",
+      dialogDescription: "Συμπληρώστε τα στοιχεία του καθαρισμού",
       totalCleanings: "Συνολικοί Καθαρισμοί",
       completedCleanings: "Ολοκληρωμένοι",
       scheduledCleanings: "Προγραμματισμένοι",
@@ -132,7 +200,10 @@ export const translations = {
     // Fixed Costs / Expenses
     expenses: {
       title: "Σταθερά Έξοδα",
+      subtitle: "Μηνιαία έξοδα & κατανομή",
       addExpense: "Προσθήκη Εξόδου",
+      dialogDescription: "Συμπληρώστε τα στοιχεία του εξόδου",
+      allocationExample: "Για παράδειγμα, αν έχεις 20 νύχτες κρατήσεις τον μήνα, κάθε νύχτα επιβαρύνεται αναλογικά.",
       monthlyTotal: "Μηνιαίο Σύνολο",
       yearlyTotal: "Ετήσιο Σύνολο",
       costPerNight: "Κόστος / Νύχτα",
@@ -403,6 +474,11 @@ export const translations = {
     nfcEditor: {
       title: "Live Editor",
       subtitle: "Επεξεργάσου κάθε σελίδα σε πραγματικό χρόνο",
+      pageSubtitle: "Επεξεργασία σελίδας επισκέπτη",
+      placeholders: {
+        beach: "Παραλία",
+        distance: "5 λεπτά",
+      },
       pages: {
         home: "Αρχική",
         welcome: "Καλωσόρισμα",
@@ -450,6 +526,66 @@ export const translations = {
     },
   },
   en: {
+    // Error boundaries
+    error: {
+      title: "Something went wrong",
+      description: "An unexpected error occurred. Please try again.",
+      retry: "Try again",
+      backToDashboard: "Back to Dashboard",
+    },
+
+    // Header / Public Navigation
+    header: {
+      howItWorks: "How It Works",
+      features: "Features",
+      nfc: "NFC Guest Page",
+      pricing: "Pricing",
+      about: "About",
+      signIn: "Sign In",
+      tryFree: "Try Free",
+    },
+
+    // Features Section (landing page)
+    features: {
+      badge: "Full coverage",
+      headline: "Every cost, automatically tracked",
+      subheadline: "Everything is calculated automatically for each booking — you just see the final result.",
+      electricityTitle: "Electricity per night",
+      electricityDesc: "Automatic consumption allocation to stay days.",
+      waterTitle: "Water cost",
+      waterDesc: "m\u00B3 readings and calculation per booking period.",
+      cleaningTitle: "Cleaning",
+      cleaningDesc: "Turnover events charged directly to the booking.",
+      fixedMonthlyTitle: "Fixed monthly",
+      fixedMonthlyDesc: "Internet, subscriptions split across occupied nights.",
+      profitTrendsTitle: "Profit trends",
+      profitTrendsDesc: "Monthly margin and profit evolution per property.",
+      lowMarginAlertsTitle: "Low margin alerts",
+      lowMarginAlertsDesc: "Notifications for bookings with negative or low profit.",
+    },
+
+    // Trends page
+    trends: {
+      title: "Trends",
+      subtitle: "Profitability analysis",
+      emptyDescription: "Trends will appear automatically when there are enough bookings to analyze. Add bookings to see statistics and trends.",
+      monthProfit: "Monthly Profit",
+      vsPrevious: "vs prev.",
+      avgMargin: "Avg Margin",
+      average: "Average",
+      occupancy: "Occupancy",
+      currentMonth: "Current month",
+      profitPerNight: "Profit/Night",
+      revenueVsProfit: "Revenue vs Profit",
+      month: "Month",
+      revenue: "Revenue",
+      costs: "Costs",
+      profit: "Profit",
+      costAnalysisVsPrev: "Cost Analysis (vs prev. month)",
+      insights: "Insights",
+      insightsDescription: "Insights will appear automatically when there is enough data to analyze.",
+    },
+
     // Landing Page - Problem Section
     problem: {
       badge: "The Problem",
@@ -498,11 +634,17 @@ export const translations = {
     dashboard: {
       title: "Dashboard",
       newBooking: "New Booking",
+      welcome: "Welcome to SimplyTouch!",
+      welcomeDesc: "Create your first property to get started.",
+      addPropertyCta: "Add Property",
+      noProperties: "No properties",
+      monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
     },
     
     // Bookings
     bookings: {
       title: "Bookings",
+      subtitle: "Booking management",
       newBooking: "New Booking",
       searchGuest: "Search guest...",
       filters: "Filters",
@@ -547,7 +689,9 @@ export const translations = {
     // Cleanings
     cleanings: {
       title: "Cleanings",
+      subtitle: "Turnover events & cleaning team",
       newCleaning: "New Cleaning",
+      dialogDescription: "Fill in the cleaning details",
       totalCleanings: "Total Cleanings",
       completedCleanings: "Completed",
       scheduledCleanings: "Scheduled",
@@ -582,7 +726,10 @@ export const translations = {
     // Fixed Costs / Expenses
     expenses: {
       title: "Fixed Costs",
+      subtitle: "Monthly expenses & allocation",
       addExpense: "Add Expense",
+      dialogDescription: "Fill in the expense details",
+      allocationExample: "For example, if you have 20 booking nights per month, each night is charged proportionally.",
       monthlyTotal: "Monthly Total",
       yearlyTotal: "Yearly Total",
       costPerNight: "Cost / Night",
@@ -853,6 +1000,11 @@ export const translations = {
     nfcEditor: {
       title: "Live Editor",
       subtitle: "Edit each page in real-time",
+      pageSubtitle: "Edit guest page",
+      placeholders: {
+        beach: "Beach",
+        distance: "5 min",
+      },
       pages: {
         home: "Home",
         welcome: "Welcome",

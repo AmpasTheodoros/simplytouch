@@ -5,18 +5,20 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
-
-const navLinks = [
-  { href: "/how-it-works", label: "Πώς Λειτουργεί" },
-  { href: "/features", label: "Χαρακτηριστικά" },
-  { href: "/nfc", label: "NFC Guest Page" },
-  { href: "/pricing", label: "Τιμολόγηση" },
-  { href: "/about", label: "Σχετικά" },
-];
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { t } = useLanguage();
+
+  const navLinks = [
+    { href: "/how-it-works", label: t.header.howItWorks },
+    { href: "/features", label: t.header.features },
+    { href: "/nfc", label: t.header.nfc },
+    { href: "/pricing", label: t.header.pricing },
+    { href: "/about", label: t.header.about },
+  ];
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
@@ -53,12 +55,12 @@ export function Header() {
           <div className="hidden lg:flex items-center gap-3">
             <Link href="/dashboard">
               <Button variant="outline" size="sm">
-                Σύνδεση
+                {t.header.signIn}
               </Button>
             </Link>
             <Link href="/dashboard">
               <Button variant="cta" size="sm">
-                Δοκίμασε Δωρεάν
+                {t.header.tryFree}
               </Button>
             </Link>
           </div>
@@ -67,6 +69,8 @@ export function Header() {
           <button
             className="lg:hidden p-2 rounded-lg hover:bg-secondary"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? t.close : "Menu"}
+            aria-expanded={mobileMenuOpen}
           >
             {mobileMenuOpen ? (
               <X className="w-6 h-6 text-foreground" />
@@ -97,12 +101,12 @@ export function Header() {
               <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-border">
                 <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="outline" className="w-full">
-                    Σύνδεση
+                    {t.header.signIn}
                   </Button>
                 </Link>
                 <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="cta" className="w-full">
-                    Δοκίμασε Δωρεάν
+                    {t.header.tryFree}
                   </Button>
                 </Link>
               </div>

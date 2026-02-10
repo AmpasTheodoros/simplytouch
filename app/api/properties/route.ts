@@ -3,26 +3,36 @@ import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 import { createPropertySchema } from "@/lib/validation/property";
 import { DEFAULT_TIMEZONE } from "@/lib/constants";
+import { parsePagination, paginatedResponse } from "@/lib/pagination";
 
 // GET /api/properties - List user's properties
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const user = await requireAuth();
+    const searchParams = request.nextUrl.searchParams;
+    const { page, pageSize, skip, take } = parsePagination(searchParams, 50);
 
-    const properties = await db.property.findMany({
-      where: { userId: user.id },
-      orderBy: { createdAt: "desc" },
-      include: {
-        _count: {
-          select: {
-            bookings: true,
-            guestPages: true,
+    const where = { userId: user.id };
+
+    const [properties, total] = await Promise.all([
+      db.property.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        include: {
+          _count: {
+            select: {
+              bookings: true,
+              guestPages: true,
+            },
           },
         },
-      },
-    });
+        skip,
+        take,
+      }),
+      db.property.count({ where }),
+    ]);
 
-    return NextResponse.json(properties);
+    return NextResponse.json(paginatedResponse(properties, total, page, pageSize));
   } catch (error) {
     if (error instanceof Error && error.message === "Unauthorized") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

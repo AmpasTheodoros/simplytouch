@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth, requirePropertyOwnership } from "@/lib/auth";
 import { createBookingSchema } from "@/lib/validation/booking";
+import { parsePagination, paginatedResponse } from "@/lib/pagination";
 
 // GET /api/bookings - List bookings with filters
 export async function GET(request: NextRequest) {
@@ -39,20 +40,29 @@ export async function GET(request: NextRequest) {
       statusFilter = { status };
     }
 
-    const bookings = await db.booking.findMany({
-      where: {
-        propertyId,
-        ...dateFilter,
-        ...statusFilter,
-      },
-      orderBy: { startAt: "desc" },
-      include: {
-        costAllocation: true,
-        cleaningEvent: true,
-      },
-    });
+    const { page, pageSize, skip, take } = parsePagination(searchParams);
 
-    return NextResponse.json(bookings);
+    const where = {
+      propertyId,
+      ...dateFilter,
+      ...statusFilter,
+    };
+
+    const [bookings, total] = await Promise.all([
+      db.booking.findMany({
+        where,
+        orderBy: { startAt: "desc" },
+        include: {
+          costAllocation: true,
+          cleaningEvent: true,
+        },
+        skip,
+        take,
+      }),
+      db.booking.count({ where }),
+    ]);
+
+    return NextResponse.json(paginatedResponse(bookings, total, page, pageSize));
   } catch (error) {
     if (error instanceof Error) {
       if (error.message === "Unauthorized") {

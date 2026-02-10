@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/components/providers/LanguageProvider";
+import { toast } from "sonner";
+import { createPropertySchema } from "@/lib/validation/property";
 
 export default function AddPropertyPage() {
   const router = useRouter();
@@ -34,29 +36,38 @@ export default function AddPropertyPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const payload = {
+      name: formData.name,
+      timezone: formData.timezone,
+      pricePerWh: Math.round(parseFloat(formData.pricePerKwh) * 100),
+    };
+
+    const validation = createPropertySchema.safeParse(payload);
+    if (!validation.success) {
+      const firstError = validation.error.issues[0]?.message || "Validation error";
+      toast.error(firstError);
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const response = await fetch("/api/properties", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: formData.name,
-          address: formData.address || undefined,
-          timezone: formData.timezone,
-          pricePerWh: Math.round(parseFloat(formData.pricePerKwh) * 100), // Convert €/kWh to cents/Wh * 100
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
         router.push("/dashboard/settings/properties");
       } else {
         const error = await response.json();
-        alert(error.error || "Failed to create property");
+        toast.error(error.error || "Failed to create property");
       }
     } catch (error) {
       console.error("Error creating property:", error);
-      alert("An error occurred while creating the property");
+      toast.error("An error occurred while creating the property");
     } finally {
       setIsSubmitting(false);
     }

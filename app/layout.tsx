@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { LanguageProvider } from "@/components/providers/LanguageProvider";
 import { PropertyProvider } from "@/components/providers/PropertyProvider";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const inter = Inter({
@@ -31,6 +32,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
+      {/* lang="el" is the SSR default; LanguageProvider updates it client-side based on user preference */}
       <html lang="el" suppressHydrationWarning>
         <body
           className={`${inter.variable} ${dmSans.variable} antialiased font-sans`}
@@ -39,6 +41,7 @@ export default function RootLayout({
             <LanguageProvider>
               <PropertyProvider>
                 {children}
+                <Toaster />
               </PropertyProvider>
             </LanguageProvider>
           </ThemeProvider>

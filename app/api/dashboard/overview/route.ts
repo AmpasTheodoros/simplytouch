@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
-import { getOverviewStats, getMonthlyBookings, type OverviewStats, type BookingWithAllocation } from "@/lib/queries/dashboard";
-
-interface AggregatedBooking extends BookingWithAllocation {
-  propertyName: string;
-}
+import { getOverviewStats, getMonthlyBookings, getAggregatedOverviewStats, type OverviewStats, type BookingWithAllocation } from "@/lib/queries/dashboard";
 
 // GET /api/dashboard/overview - Get overview stats and bookings
 export async function GET(request: NextRequest) {
@@ -18,65 +14,26 @@ export async function GET(request: NextRequest) {
     const year = parseInt(searchParams.get("year") || String(new Date().getFullYear()));
     const month = parseInt(searchParams.get("month") || String(new Date().getMonth() + 1));
 
-    // If viewAll is true, aggregate stats from all properties
+    // If viewAll is true, aggregate stats from all properties in a single query
     if (viewAll) {
-      const properties = await db.property.findMany({
-        where: { userId: user.id },
-        select: { id: true, name: true },
-      });
+      const result = await getAggregatedOverviewStats(user.id, year, month);
 
-      if (properties.length === 0) {
-        return NextResponse.json({
-          stats: null,
-          bookings: [],
-          propertyName: null,
-        });
+      if (result.bookings.length === 0 && result.stats.totalBookings === 0) {
+        // Check if user has any properties at all
+        const propertyCount = await db.property.count({ where: { userId: user.id } });
+        if (propertyCount === 0) {
+          return NextResponse.json({
+            stats: null,
+            bookings: [],
+            propertyName: null,
+          });
+        }
       }
-
-      // Aggregate stats from all properties
-      let totalStats: OverviewStats = {
-        totalBookings: 0,
-        totalRevenueCents: 0,
-        totalCostsCents: 0,
-        totalProfitCents: 0,
-        avgMarginPercent: 0,
-        avgCostPerNightCents: 0,
-        totalNights: 0,
-      };
-
-      const allBookings: AggregatedBooking[] = [];
-
-      for (const property of properties) {
-        const stats = await getOverviewStats(property.id, year, month);
-        const bookings = await getMonthlyBookings(property.id, year, month);
-
-        totalStats.totalBookings += stats.totalBookings;
-        totalStats.totalRevenueCents += stats.totalRevenueCents;
-        totalStats.totalCostsCents += stats.totalCostsCents;
-        totalStats.totalProfitCents += stats.totalProfitCents;
-        totalStats.totalNights += stats.totalNights;
-
-        // Add property name to bookings
-        allBookings.push(
-          ...bookings.map((b) => ({ ...b, propertyName: property.name }))
-        );
-      }
-
-      // Recalculate averages
-      totalStats.avgMarginPercent = totalStats.totalRevenueCents > 0
-        ? Math.round((totalStats.totalProfitCents / totalStats.totalRevenueCents) * 1000) / 10
-        : 0;
-      totalStats.avgCostPerNightCents = totalStats.totalNights > 0
-        ? Math.round(totalStats.totalCostsCents / totalStats.totalNights)
-        : 0;
-
-      // Sort bookings by date
-      allBookings.sort((a, b) => new Date(b.startAt).getTime() - new Date(a.startAt).getTime());
 
       return NextResponse.json({
-        stats: totalStats,
-        bookings: allBookings,
-        propertyName: "Όλα τα ακίνητα",
+        stats: result.stats,
+        bookings: result.bookings,
+        propertyName: null,
       });
     }
 

@@ -15,6 +15,8 @@ interface OverviewViewProps {
   initialStats?: OverviewStats;
   initialBookings?: BookingWithAllocation[];
   initialPropertyName?: string;
+  monthIndex?: number;
+  year?: number;
 }
 
 // Helper to format cents as euros
@@ -45,7 +47,9 @@ function formatDateRange(startAt: Date, endAt: Date): string {
 export default function OverviewView({ 
   initialStats, 
   initialBookings = [], 
-  initialPropertyName 
+  initialPropertyName,
+  monthIndex,
+  year,
 }: OverviewViewProps) {
   const { properties } = useProperty();
   const { t } = useLanguage();
@@ -176,7 +180,7 @@ export default function OverviewView({
           </div>
         ) : (
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full" aria-label="Monthly bookings overview">
             <thead className="bg-secondary/50">
               <tr>
                 <th className="text-left p-4 font-medium text-muted-foreground text-sm">
